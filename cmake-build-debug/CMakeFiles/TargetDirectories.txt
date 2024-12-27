@@ -1,0 +1,6 @@
+/Users/johnkorreck/Desktop/ChessEngine/cmake-build-debug/CMakeFiles/Chess_Engine.dir
+/Users/johnkorreck/Desktop/ChessEngine/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/johnkorreck/Desktop/ChessEngine/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/Users/johnkorreck/Desktop/ChessEngine/cmake-build-debug/ChessEngineLib/CMakeFiles/ChessEngineLib.dir
+/Users/johnkorreck/Desktop/ChessEngine/cmake-build-debug/ChessEngineLib/CMakeFiles/edit_cache.dir
+/Users/johnkorreck/Desktop/ChessEngine/cmake-build-debug/ChessEngineLib/CMakeFiles/rebuild_cache.dir
