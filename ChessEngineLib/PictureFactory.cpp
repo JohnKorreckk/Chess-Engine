@@ -1,8 +1,7 @@
 /**
  * @file PictureFactory.cpp
  *
- * @author Charles Owen
- * @author Anik Momtaz
+ * @author John Korreck
  */
 
 #include "pch.h"
