@@ -14,3 +14,10 @@ Square::Square(const std::wstring& name) : PolyDrawable(name)
 {
 }
 
+void Square::Draw(std::shared_ptr<wxGraphicsContext> graphics)
+{
+ PolyDrawable::Draw(graphics);
+}
+
+
+

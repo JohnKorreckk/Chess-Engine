@@ -37,6 +37,8 @@ public:
  wxPoint GetCenter() { return mCenter; };
 
  void SetCenter(wxPoint point) { mCenter = point; }
+
+ void Draw(std::shared_ptr<wxGraphicsContext> graphics) override;
 };
 
 

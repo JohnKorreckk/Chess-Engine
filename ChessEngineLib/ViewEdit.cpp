@@ -138,6 +138,7 @@ void ViewEdit::OnLeftUp(wxMouseEvent &event)
         const int squareSize = 75;
         std::shared_ptr<Square> newSquare = mSelectedItem->GetClosestSquare(wxPoint(mSelectedDrawable->GetPosition().x + 35, mSelectedDrawable->GetPosition().y + 30));
         mSelectedDrawable->SetPosition(wxPoint(newSquare->GetCenter().x-(squareSize/2), newSquare->GetCenter().y-(squareSize/2)));
+        GetPicture()->UpdateObservers();
     }
     OnMouseMove(event);
 }
