@@ -13,6 +13,8 @@
 #include "Square.h"
 #include "Item.h"
 #include "Drawable.h"
+#include "Board.h"
+#include "Piece.h"
 
 /// A scaling fItem, converts mouse motion to rotation in radians
 const double RotationScaling = 0.02;
@@ -95,7 +97,7 @@ void ViewEdit::OnLeftDown(wxMouseEvent &event)
     }
 
     std::shared_ptr<Drawable> drawable = GetPicture()->GetBoard()->HitTest(wxPoint(click.x, click.y));
-    std::shared_ptr<Item> hitBoard;
+    std::shared_ptr<Board> hitBoard;
     if (drawable != nullptr)
     {
         hitBoard = GetPicture()->GetBoard();
@@ -113,16 +115,11 @@ void ViewEdit::OnLeftDown(wxMouseEvent &event)
     // current mode.
     if (hitBoard != nullptr)
     {
-        std::cout << "This is not nullptr" << std::endl;
-        mSelectedItem = hitBoard;
+        mBoard = hitBoard;
         mSelectedDrawable = hitDrawable;
         std::cout << hitDrawable->GetName() << std::endl;
-        mSelectedItem->MoveToBack(mSelectedDrawable);
+        mBoard->MoveToBack(mSelectedDrawable);
         GetPicture()->GetBoard();
-    }
-    else
-    {
-        std::cout << "This is nullptr" << std::endl;
     }
 }
 
@@ -136,7 +133,12 @@ void ViewEdit::OnLeftUp(wxMouseEvent &event)
     {
         /// Size of each square
         const int squareSize = 75;
-        std::shared_ptr<Square> newSquare = mSelectedItem->GetClosestSquare(wxPoint(mSelectedDrawable->GetPosition().x + 35, mSelectedDrawable->GetPosition().y + 30));
+        std::shared_ptr<Square> newSquare = mBoard->GetClosestSquare(wxPoint(mSelectedDrawable->GetPosition().x + 35, mSelectedDrawable->GetPosition().y + 30));
+        if (newSquare->GetPiece())
+        {
+            newSquare->GetPiece()->SetPosition(wxPoint(0,0));
+        }
+        newSquare->SetPiece(mSelectedDrawable);
         mSelectedDrawable->SetPosition(wxPoint(newSquare->GetCenter().x-(squareSize/2), newSquare->GetCenter().y-(squareSize/2)));
         GetPicture()->UpdateObservers();
     }
@@ -168,16 +170,11 @@ void ViewEdit::OnMouseMove(wxMouseEvent &event)
                 }
                 else
                 {
-                    mSelectedItem->SetItemPosition(mSelectedItem->GetItemPosition() + delta);
+                    if (mSelectedItem)
+                    {
+                        mSelectedItem->SetItemPosition(mSelectedItem->GetItemPosition() + delta);
+                    }
                 }
-                GetPicture()->UpdateObservers();
-            }
-            break;
-
-        case Mode::Rotate:
-            if (mSelectedDrawable != nullptr)
-            {
-                mSelectedDrawable->SetRotation(mSelectedDrawable->GetRotation() + delta.y * RotationScaling);
                 GetPicture()->UpdateObservers();
             }
             break;

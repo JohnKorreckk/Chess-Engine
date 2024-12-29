@@ -14,7 +14,7 @@ class Piece;
 class Square : public PolyDrawable {
 private:
  /// The piece assigned to this square
- std::shared_ptr<Piece> mPiece = nullptr;
+ std::shared_ptr<Drawable> mPiece = nullptr;
 
  /// The center of the square
  wxPoint mCenter = wxPoint(0, 0);
@@ -39,6 +39,10 @@ public:
  void SetCenter(wxPoint point) { mCenter = point; }
 
  void Draw(std::shared_ptr<wxGraphicsContext> graphics) override;
+
+ void SetPiece(std::shared_ptr<Drawable> piece) { mPiece = piece; }
+
+ std::shared_ptr<Drawable> GetPiece() { return mPiece; }
 };
 
 

@@ -23,6 +23,11 @@ private:
  bool isWhite = true;
  /// All pieces in the board
  std::vector<std::shared_ptr<Square>> mSquares;
+ /// All possible moves
+ std::vector<int> mPossibleMoves;
+ /// Whose turn is it?
+ bool mWhiteTurn = true;
+
 
 public:
  /// Destructor
@@ -58,7 +63,10 @@ public:
   */
  std::vector<std::vector<int>> FenParser(std::wstring fenString);
  std::shared_ptr<Square> GetClosestSquare(wxPoint pos) override;
+ void GeneratePossibleMoves(std::vector<std::vector<int>> board, bool whiteTurn);
+ std::vector<int> GenerateSlidingMoves(std::vector<std::vector<int>> board);
  void AddSquare(std::shared_ptr<Square> square) { mSquares.push_back(square); }
+ std::vector<std::shared_ptr<Square>> GetSquares() { return mSquares; }
 };
 
 

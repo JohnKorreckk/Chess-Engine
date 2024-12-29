@@ -19,22 +19,34 @@ const int squareSize = 75;
 /// Directory within resources that contains the images.
 const std::wstring ImagesDirectory = L"/images";
 
-// Binary representations for pieces
+// Uncolored pieces
+const int EMPTY = 0;
+const int KING = 1;
+const int PAWN = 2;
+const int KNIGHT = 3;
+const int BISHOP = 4;
+const int ROOK = 5;
+const int QUEEN = 6;
+
+// Color values
+const int WHITE = 8;
+const int BLACK = 16;
+
 // White pieces (uppercase)
-const int WHITE_PAWN = 1;
-const int WHITE_KNIGHT = 3;
-const int WHITE_BISHOP = 5;
-const int WHITE_ROOK = 7;
-const int WHITE_QUEEN = 9;
-const int WHITE_KING = 11;
+const int WHITE_KING = WHITE + KING;
+const int WHITE_PAWN = WHITE + PAWN;
+const int WHITE_KNIGHT = WHITE + KNIGHT;
+const int WHITE_BISHOP = WHITE + BISHOP;
+const int WHITE_ROOK = WHITE + ROOK;
+const int WHITE_QUEEN = WHITE + QUEEN;
 
 // Black pieces (lowercase)
-const int BLACK_PAWN = 2;
-const int BLACK_KNIGHT = 4;
-const int BLACK_BISHOP = 6;
-const int BLACK_ROOK = 8;
-const int BLACK_QUEEN = 10;
-const int BLACK_KING = 12;
+const int BLACK_KING = BLACK + KING;
+const int BLACK_PAWN = BLACK + PAWN;
+const int BLACK_KNIGHT = BLACK + KNIGHT;
+const int BLACK_BISHOP = BLACK + BISHOP;
+const int BLACK_ROOK = BLACK + ROOK;
+const int BLACK_QUEEN = BLACK + QUEEN;
 
 std::shared_ptr<Board> BoardFactory::Create(std::wstring resourcesDir)
 {
@@ -44,8 +56,8 @@ std::shared_ptr<Board> BoardFactory::Create(std::wstring resourcesDir)
     auto board = std::make_shared<Board>(name, imagesDir);
     board->SetRelativePosition(wxPoint(250, 100));
 
-    for (int file = 0; file < 8; file++) {
-        for (int rank = 0; rank < 8; rank++)
+    for (int rank = 0; rank < 8; rank++) {
+        for (int file = 0; file < 8; file++)
         {
             // Determine if the square is light or dark
             bool isLightSquare = (file + rank) % 2 != 0;
@@ -81,8 +93,8 @@ std::shared_ptr<Board> BoardFactory::Create(std::wstring resourcesDir)
         }
   }
 
-        for (int file = 0; file < 8; file++) {
-            for (int rank = 0; rank < 8; rank++) {
+        for (int rank = 0; rank < 8; rank++) {
+            for (int file = 0; file < 8; file++) {
                 std::wstring pieceName;
 
                 // Position the square on the board
@@ -112,6 +124,7 @@ std::shared_ptr<Board> BoardFactory::Create(std::wstring resourcesDir)
                     piece->SetPosition(wxPoint(x, y));
                     piece->SetActor(&*board);
                     board->AddDrawable(piece);
+                    board->GetSquares()[rank*8 + file]->SetPiece(piece);
                 }
             }
  }

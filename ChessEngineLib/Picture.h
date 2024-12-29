@@ -10,6 +10,7 @@
 
 class PictureObserver;
 class Item;
+class Board;
 
 /**
  *  Class that represents our animation picture
@@ -27,7 +28,7 @@ private:
     std::vector<std::shared_ptr<Item>> mItems;
 
     /// The board inside the picture
-    std::shared_ptr<Item> mBoard = nullptr;
+    std::shared_ptr<Board> mBoard = nullptr;
 
 public:
     Picture();
@@ -55,8 +56,8 @@ public:
     void SetSize(wxSize size) {mSize = size;}
 
     void AddObserver(PictureObserver *observer);
-    void SetBoard(std::shared_ptr<Item> board) { mBoard = board; };
-    std::shared_ptr<Item> GetBoard() { return mBoard; };
+    void SetBoard(std::shared_ptr<Board> board) { mBoard = board; };
+    std::shared_ptr<Board> GetBoard() { return mBoard; };
     void RemoveObserver(PictureObserver *observer);
     void UpdateObservers();
     void Draw(std::shared_ptr<wxGraphicsContext> graphics);

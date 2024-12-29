@@ -15,6 +15,7 @@
 
 class Item;
 class Drawable;
+class Board;
 
 /**
  * View class for our aquarium
@@ -35,6 +36,9 @@ private:
 
     /// The currently selected drawable
     std::shared_ptr<Drawable> mSelectedDrawable;
+
+    /// The selected board
+    std::shared_ptr<Board> mBoard;
 
     /// The resource directory
     std::wstring mResourcesDir;

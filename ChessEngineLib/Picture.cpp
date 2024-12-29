@@ -8,6 +8,7 @@
 #include "Picture.h"
 #include "PictureObserver.h"
 #include "Item.h"
+#include "Board.h"
 
 
 /**
