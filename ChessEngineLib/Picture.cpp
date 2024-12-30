@@ -67,7 +67,7 @@ void Picture::Draw(std::shared_ptr<wxGraphicsContext> graphics)
 
 /**
  * Add an Item to this drawable.
- * @param Item Item to add
+ * @param item Item to add
  */
 void Picture::AddItem(std::shared_ptr<Item> item)
 {

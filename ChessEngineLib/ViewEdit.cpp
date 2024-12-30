@@ -96,12 +96,13 @@ void ViewEdit::OnLeftDown(wxMouseEvent &event)
         }
     }
 
-    std::shared_ptr<Drawable> drawable = GetPicture()->GetBoard()->HitTest(wxPoint(click.x, click.y));
+    std::shared_ptr<Piece> piece = GetPicture()->GetBoard()->HitTest(wxPoint(click.x, click.y));
     std::shared_ptr<Board> hitBoard;
-    if (drawable != nullptr)
+    std::shared_ptr<Piece> hitPiece;
+    if (piece != nullptr)
     {
         hitBoard = GetPicture()->GetBoard();
-        hitDrawable = drawable;
+        hitPiece = piece;
     }
 
     // If we hit something determine what we do with it based on the
@@ -116,10 +117,10 @@ void ViewEdit::OnLeftDown(wxMouseEvent &event)
     if (hitBoard != nullptr)
     {
         mBoard = hitBoard;
-        mSelectedDrawable = hitDrawable;
-        std::cout << hitDrawable->GetName() << std::endl;
-        mBoard->MoveToBack(mSelectedDrawable);
-        GetPicture()->GetBoard();
+        mSelectedPiece = hitPiece;
+        mSelectedDrawable = hitPiece;
+        std::cout << hitPiece->GetName() << std::endl;
+        mBoard->MoveToBack(mSelectedPiece);
     }
 }
 
@@ -129,17 +130,21 @@ void ViewEdit::OnLeftDown(wxMouseEvent &event)
 */
 void ViewEdit::OnLeftUp(wxMouseEvent &event)
 {
-    if (mSelectedDrawable && mSelectedDrawable->IsMovable())
+    if (mSelectedPiece && mSelectedPiece->IsMovable())
     {
         /// Size of each square
         const int squareSize = 75;
-        std::shared_ptr<Square> newSquare = mBoard->GetClosestSquare(wxPoint(mSelectedDrawable->GetPosition().x + 35, mSelectedDrawable->GetPosition().y + 30));
+        std::shared_ptr<Square> newSquare = mBoard->GetClosestSquare(wxPoint(mSelectedPiece->GetPosition().x + 35, mSelectedPiece->GetPosition().y + 30));
         if (newSquare->GetPiece())
         {
             newSquare->GetPiece()->SetPosition(wxPoint(0,0));
         }
-        newSquare->SetPiece(mSelectedDrawable);
-        mSelectedDrawable->SetPosition(wxPoint(newSquare->GetCenter().x-(squareSize/2), newSquare->GetCenter().y-(squareSize/2)));
+        if (mSelectedPiece->GetSquare())
+        {
+            mSelectedPiece->GetSquare()->SetPiece(nullptr);
+        }
+        newSquare->SetPiece(&*mSelectedPiece);
+        mSelectedPiece->SetPosition(wxPoint(newSquare->GetCenter().x-(squareSize/2), newSquare->GetCenter().y-(squareSize/2)));
         GetPicture()->UpdateObservers();
     }
     OnMouseMove(event);

@@ -151,3 +151,15 @@ std::vector<int> Board::GenerateSlidingMoves(std::vector<std::vector<int>> board
     std::vector<int> slidingMoves;
     return slidingMoves;
 }
+
+std::shared_ptr<Piece> Board::HitTest(wxPoint pos)
+{
+    for (auto piece : mPieces)
+    {
+        if (piece->HitTest(pos))
+        {
+            return piece;
+        }
+    }
+    return nullptr;
+}

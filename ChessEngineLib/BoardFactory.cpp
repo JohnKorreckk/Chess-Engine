@@ -124,7 +124,8 @@ std::shared_ptr<Board> BoardFactory::Create(std::wstring resourcesDir)
                     piece->SetPosition(wxPoint(x, y));
                     piece->SetActor(&*board);
                     board->AddDrawable(piece);
-                    board->GetSquares()[rank*8 + file]->SetPiece(piece);
+                    board->AddPiece(piece);
+                    board->GetSquares()[rank*8 + file]->SetPiece(&*piece);
                 }
             }
  }

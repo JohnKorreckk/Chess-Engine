@@ -15,7 +15,7 @@ class Square;
 class Piece : public ImageDrawable {
 private:
  /// The piece assigned to this square
- std::shared_ptr<Square> mSquare = nullptr;
+ Square* mSquare = nullptr;
 public:
  /**
   * @brief Constructor for the Piece class with name and filename.
@@ -34,6 +34,9 @@ public:
 
  bool IsMovable() override {return true;}
 
+ void SetSquare(Square* square) { mSquare = square; }
+
+ Square* GetSquare() { return mSquare; }
 };
 
 

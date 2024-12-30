@@ -23,6 +23,8 @@ private:
  bool isWhite = true;
  /// All pieces in the board
  std::vector<std::shared_ptr<Square>> mSquares;
+ /// All pieces in the board
+ std::vector<std::shared_ptr<Piece>> mPieces;
  /// All possible moves
  std::vector<int> mPossibleMoves;
  /// Whose turn is it?
@@ -67,6 +69,9 @@ public:
  std::vector<int> GenerateSlidingMoves(std::vector<std::vector<int>> board);
  void AddSquare(std::shared_ptr<Square> square) { mSquares.push_back(square); }
  std::vector<std::shared_ptr<Square>> GetSquares() { return mSquares; }
+ void AddPiece(std::shared_ptr<Piece> piece) { mPieces.push_back(piece); }
+ std::vector<std::shared_ptr<Piece>> GetPieces() { return mPieces; }
+ std::shared_ptr<Piece> HitTest(wxPoint pos);
 };
 
 
