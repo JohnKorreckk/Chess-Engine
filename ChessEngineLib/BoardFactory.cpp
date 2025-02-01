@@ -61,7 +61,8 @@ std::shared_ptr<Board> BoardFactory::Create(std::wstring resourcesDir)
         {
             // Determine if the square is light or dark
             bool isLightSquare = (file + rank) % 2 != 0;
-            std::wstring name = L"Square" + std::to_wstring(file) + L"_" + std::to_wstring(rank);
+            char letter = 'a' + file;
+            std::wstring name{letter + std::to_wstring(abs(rank - 8))};
             // Create a drawable polygon for the square
             auto square = std::make_shared<Square>(name);
             // square->SetClickable(false);
@@ -121,11 +122,12 @@ std::shared_ptr<Board> BoardFactory::Create(std::wstring resourcesDir)
                 if (pieceName != "EMPTY")
                 {
                     auto piece = std::make_shared<Piece>(std::to_wstring(board->GetBoard()[rank][file]), imagesDir + pieceName);
-                    piece->SetPosition(wxPoint(x, y));
+                    board->GetSquares()[rank*8 + file]->SetPiece(&*piece);
+                    wxPoint pos = piece->GetSquare()->GetPosition();
+                    piece->SetPosition(wxPoint(pos.x - 75/2, pos.y - 75/2));
                     piece->SetActor(&*board);
                     board->AddDrawable(piece);
                     board->AddPiece(piece);
-                    board->GetSquares()[rank*8 + file]->SetPiece(&*piece);
                 }
             }
  }

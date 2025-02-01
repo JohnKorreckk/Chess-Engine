@@ -11,6 +11,8 @@
 #include "Square.h"
 #include "Item.h"
 
+#include <unordered_set>
+
 class Board : public Item {
 private:
  /// The actual board object
@@ -26,7 +28,7 @@ private:
  /// All pieces in the board
  std::vector<std::shared_ptr<Piece>> mPieces;
  /// All possible moves
- std::vector<int> mPossibleMoves;
+ std::vector<std::wstring> mPossibleMoves;
  /// Whose turn is it?
  bool mWhiteTurn = true;
 
@@ -58,6 +60,10 @@ public:
  /// Set the current position
  wxPoint GetRelativePosition() { return mRelativePosition; };
 
+ void SetWhiteTurn(bool whiteTurn) { mWhiteTurn = whiteTurn; }
+
+ bool GetWhiteTurn() { return mWhiteTurn; }
+
  /**
   * Interprets Fen position and returns an 8x8 vector containing the board and its pieces
   * @param fenString
@@ -65,13 +71,15 @@ public:
   */
  std::vector<std::vector<int>> FenParser(std::wstring fenString);
  std::shared_ptr<Square> GetClosestSquare(wxPoint pos) override;
- void GeneratePossibleMoves(std::vector<std::vector<int>> board, bool whiteTurn);
+ void GeneratePossibleMoves();
  std::vector<int> GenerateSlidingMoves(std::vector<std::vector<int>> board);
  void AddSquare(std::shared_ptr<Square> square) { mSquares.push_back(square); }
  std::vector<std::shared_ptr<Square>> GetSquares() { return mSquares; }
  void AddPiece(std::shared_ptr<Piece> piece) { mPieces.push_back(piece); }
  std::vector<std::shared_ptr<Piece>> GetPieces() { return mPieces; }
  std::shared_ptr<Piece> HitTest(wxPoint pos);
+ void UpdateBoard(std::wstring const &move);
+ std::vector<std::wstring> GetPossibleMoves() { return mPossibleMoves; }
 };
 
 

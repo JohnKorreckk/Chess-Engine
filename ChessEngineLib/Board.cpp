@@ -141,9 +141,56 @@ std::shared_ptr<Square> Board::GetClosestSquare(wxPoint pos)
     return closestSquare;
 }
 
-void Board::GeneratePossibleMoves(std::vector<std::vector<int>> board, bool whiteTurn)
+void Board::GeneratePossibleMoves()
 {
+    mPossibleMoves.clear();
+    for (auto const &piece : mPieces)
+    {
+        int pieceNum = std::stoi(piece->GetName());
+        std::wstring currentSquare = piece->GetSquare()->GetName();
+        if (mWhiteTurn && (pieceNum & WHITE) != 0)
+        {
+            if (pieceNum == WHITE_PAWN)
+            {
+                // White pawn advances one
+                if (true)
+                {
+                    std::wstring oneSquareUp = currentSquare;
+                    oneSquareUp[1] = currentSquare[1] + 1;  // Move up one rank
+                    mPossibleMoves.push_back(currentSquare + oneSquareUp);
+                }
 
+                // White pawn advances two
+                if (currentSquare[1] == '2' && true)
+                {
+                    std::wstring twoSquaresUp = currentSquare;
+                    twoSquaresUp[1] = currentSquare[1] + 2;  // Move up two ranks
+                    mPossibleMoves.push_back(currentSquare + twoSquaresUp);
+                }
+            }
+        }
+        else if (!mWhiteTurn && (pieceNum & BLACK) != 0)
+        {
+            if (pieceNum == BLACK_PAWN)
+            {
+                // Black pawn advances one
+                if (true)
+                {
+                    std::wstring oneSquareDown = currentSquare;
+                    oneSquareDown[1] = currentSquare[1] - 1;  // Move down one rank
+                    mPossibleMoves.push_back(currentSquare + oneSquareDown);
+                }
+
+                // Black pawn advances two
+                if (currentSquare[1] == '7')
+                {
+                    std::wstring twoSquaresDown = currentSquare;
+                    twoSquaresDown[1] = currentSquare[1] - 2;  // Move down two ranks
+                    mPossibleMoves.push_back(currentSquare + twoSquaresDown);
+                }
+            }
+        }
+    }
 }
 
 std::vector<int> Board::GenerateSlidingMoves(std::vector<std::vector<int>> board)
@@ -162,4 +209,29 @@ std::shared_ptr<Piece> Board::HitTest(wxPoint pos)
         }
     }
     return nullptr;
+}
+
+void Board::UpdateBoard(std::wstring const &move)
+{
+    int oldRank = move[0] - 'a';
+    int oldFile = (move[1] - '0') - 8;
+    int newRank = move[2] - 'a';
+    int newFile = (move[3] - '0') - 8;
+
+    oldFile = std::abs(oldFile);
+    newFile = std::abs(newFile);
+
+    int piece = mBoard[oldFile][oldRank];
+
+    mBoard[oldFile][oldRank] = 0;
+    mBoard[newFile][newRank] = piece;
+
+    for (auto rank : mBoard)
+    {
+        for (auto file : rank)
+        {
+            std::cout << file << " | ";
+        }
+        std::cout << std::endl;
+    }
 }

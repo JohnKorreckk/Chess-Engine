@@ -117,9 +117,9 @@ void ViewEdit::OnLeftDown(wxMouseEvent &event)
     if (hitBoard != nullptr)
     {
         mBoard = hitBoard;
+        mBoard->GeneratePossibleMoves();
         mSelectedPiece = hitPiece;
         mSelectedDrawable = hitPiece;
-        std::cout << hitPiece->GetName() << std::endl;
         mBoard->MoveToBack(mSelectedPiece);
     }
 }
@@ -132,20 +132,36 @@ void ViewEdit::OnLeftUp(wxMouseEvent &event)
 {
     if (mSelectedPiece && mSelectedPiece->IsMovable())
     {
+        bool whiteTurn = mBoard->GetWhiteTurn();
         /// Size of each square
         const int squareSize = 75;
         std::shared_ptr<Square> newSquare = mBoard->GetClosestSquare(wxPoint(mSelectedPiece->GetPosition().x + 35, mSelectedPiece->GetPosition().y + 30));
-        if (newSquare->GetPiece())
+        std::wstring move = mSelectedPiece->GetSquare()->GetName() + newSquare->GetName();
+        std::vector<std::wstring> possibleMoves = mBoard->GetPossibleMoves();
+        std::cout << move << std::endl;
+        if (std::find(possibleMoves.begin(), possibleMoves.end(), move) != possibleMoves.end())
         {
-            newSquare->GetPiece()->SetPosition(wxPoint(0,0));
+            if (newSquare->GetPiece())
+            {
+                newSquare->GetPiece()->SetPosition(wxPoint(0,0));
+            }
+            if (mSelectedPiece->GetSquare())
+            {
+                mSelectedPiece->GetSquare()->SetPiece(nullptr);
+            }
+            newSquare->SetPiece(&*mSelectedPiece);
+            mSelectedPiece->SetPosition(wxPoint(newSquare->GetCenter().x-(squareSize/2), newSquare->GetCenter().y-(squareSize/2)));
+            mBoard->SetWhiteTurn(!whiteTurn);
+            mBoard->UpdateBoard(move);
+            mBoard->GeneratePossibleMoves();
+            GetPicture()->UpdateObservers();
         }
-        if (mSelectedPiece->GetSquare())
+        else
         {
-            mSelectedPiece->GetSquare()->SetPiece(nullptr);
+            wxPoint oldPos = mSelectedPiece->GetSquare()->GetPosition();
+            mSelectedPiece->SetPosition(wxPoint(oldPos.x-(squareSize/2), oldPos.y-(squareSize/2)));
+            GetPicture()->UpdateObservers();
         }
-        newSquare->SetPiece(&*mSelectedPiece);
-        mSelectedPiece->SetPosition(wxPoint(newSquare->GetCenter().x-(squareSize/2), newSquare->GetCenter().y-(squareSize/2)));
-        GetPicture()->UpdateObservers();
     }
     OnMouseMove(event);
 }
@@ -196,7 +212,6 @@ void ViewEdit::OnMouseMove(wxMouseEvent &event)
             mSelectedDrawable = nullptr;
             mSelectedItem = nullptr;
         }
-
     }
 }
 
