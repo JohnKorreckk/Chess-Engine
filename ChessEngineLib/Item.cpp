@@ -47,7 +47,6 @@ void Item::Draw(std::shared_ptr<wxGraphicsContext> graphics)
  for (auto drawable : mDrawablesInOrder)
  {
   drawable->Draw(graphics);
-  // std::cout << drawable->GetName() << " " << drawable->GetPosition().x << " " << drawable->GetPosition().y << std::endl;
  }
 }
 

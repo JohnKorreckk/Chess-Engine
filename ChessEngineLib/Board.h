@@ -11,8 +11,6 @@
 #include "Square.h"
 #include "Item.h"
 
-#include <unordered_set>
-
 class Board : public Item {
 private:
  /// The actual board object
@@ -21,8 +19,6 @@ private:
  wxPoint mRelativePosition = wxPoint(0,0);
  /// The current board position
  std::wstring mChessPosition = L"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
- /// The current player's color
- bool isWhite = true;
  /// All pieces in the board
  std::vector<std::shared_ptr<Square>> mSquares;
  /// All pieces in the board
@@ -31,7 +27,16 @@ private:
  std::vector<std::wstring> mPossibleMoves;
  /// Whose turn is it?
  bool mWhiteTurn = true;
-
+ /// King square for white
+ std::wstring mWhiteKingSquare = L"e1";
+ /// King square for black
+ std::wstring mBlackKingSquare = L"e8";
+ /// Is black in check?
+ bool mBlackInCheck = false;
+ /// Is white in check?
+ bool mWhiteInCheck = false;
+ /// The opposing color's responses
+ std::vector <std::wstring> mResponses;
 
 public:
  /// Destructor
@@ -71,9 +76,9 @@ public:
   */
  std::vector<std::vector<int>> FenParser(std::wstring fenString);
  std::shared_ptr<Square> GetClosestSquare(wxPoint pos) override;
- void GeneratePossibleMoves();
- void GenerateSlidingMoves(int const &pieceNum, int const &file, int const &rank, std::wstring const &currentSquare);
- void GenerateDiagonalMoves(int const& pieceNum, int const& file, int const& rank, std::wstring const& currentSquare);
+ void GeneratePossibleMoves(bool response);
+ void GenerateSlidingMoves(int const &pieceNum, int const &file, int const &rank, std::wstring const &currentSquare, bool response);
+ void GenerateDiagonalMoves(int const& pieceNum, int const& file, int const& rank, std::wstring const& currentSquare, bool response);
  void AddSquare(std::shared_ptr<Square> square) { mSquares.push_back(square); }
  std::vector<std::shared_ptr<Square>> GetSquares() { return mSquares; }
  void AddPiece(std::shared_ptr<Piece> piece) { mPieces.push_back(piece); }
@@ -81,10 +86,13 @@ public:
  std::shared_ptr<Piece> HitTest(wxPoint pos);
  void UpdateBoard(std::wstring const &move);
  bool CheckBounds(int file, int rank);
- void GenerateKingMoves(int const &pieceNum, int const &file, int const &rank, std::wstring const &currentSquare);
- void GeneratePawnMoves(int const& pieceNum, int const& file, int const& rank, std::wstring const& currentSquare);
- void GenerateKnightMoves(int const& pieceNum, int const& file, int const& rank, std::wstring const& currentSquare);
+ void GenerateKingMoves(int const &pieceNum, int const &file, int const &rank, std::wstring const &currentSquare, bool response);
+ void GeneratePawnMoves(int const& pieceNum, int const& file, int const& rank, std::wstring const& currentSquare, bool response);
+ void GenerateKnightMoves(int const& pieceNum, int const& file, int const& rank, std::wstring const& currentSquare, bool response);
+ void SetBlackKingSquare(std::wstring const &pos) { mBlackKingSquare = pos; }
+ void SetWhiteKingSquare(std::wstring const &pos) { mWhiteKingSquare = pos; }
  std::vector<std::wstring> GetPossibleMoves() { return mPossibleMoves; }
+ void displayWinner();
 };
 
 

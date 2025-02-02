@@ -52,14 +52,6 @@ const int BLACK_QUEEN = BLACK + QUEEN;
 Board::Board(std::wstring& name, std::wstring resourcesDir) : Item(name)
 {
     mBoard = FenParser(mChessPosition);
-    for (auto file : mBoard)
-    {
-        for (auto item : file)
-        {
-            std::cout << item << " | ";
-        }
-        std::cout << std::endl;
-    }
 }
 
 std::vector<std::vector<int>> Board::FenParser(std::wstring fenString)
@@ -141,9 +133,12 @@ std::shared_ptr<Square> Board::GetClosestSquare(wxPoint pos)
     return closestSquare;
 }
 
-void Board::GeneratePossibleMoves()
+void Board::GeneratePossibleMoves(bool response)
 {
-    mPossibleMoves.clear();
+    if (!response)
+    {
+        mPossibleMoves.clear();
+    }
     for (int file = 0; file < 8; file++) {
         for (int rank = 0; rank < 8; rank++) {
 
@@ -156,27 +151,28 @@ void Board::GeneratePossibleMoves()
             {
                 if (pieceNum == WHITE_PAWN)
                 {
-                    GeneratePawnMoves(pieceNum, file, rank, currentSquare);
+                    GeneratePawnMoves(pieceNum, file, rank, currentSquare, response);
                 }
                 if (pieceNum == WHITE_KING)
                 {
-                    GenerateKingMoves(pieceNum, file, rank, currentSquare);
+                    GenerateKingMoves(pieceNum, file, rank, currentSquare, response);
                 }
                 if (pieceNum == WHITE_KNIGHT)
                 {
-                    GenerateKnightMoves(pieceNum, file, rank, currentSquare);
+                    GenerateKnightMoves(pieceNum, file, rank, currentSquare, response);
                 }
                 if (pieceNum == WHITE_BISHOP)
                 {
-                    GenerateDiagonalMoves(pieceNum, file, rank, currentSquare);
+                    GenerateDiagonalMoves(pieceNum, file, rank, currentSquare, response);
                 }
                 if (pieceNum == WHITE_ROOK)
                 {
-                    GenerateSlidingMoves(pieceNum, file, rank, currentSquare);
+                    GenerateSlidingMoves(pieceNum, file, rank, currentSquare, response);
                 }
                 if (pieceNum == WHITE_QUEEN)
                 {
-                    GenerateSlidingMoves(pieceNum, file, rank, currentSquare);
+                    GenerateSlidingMoves(pieceNum, file, rank, currentSquare, response);
+                    GenerateDiagonalMoves(pieceNum, file, rank, currentSquare, response);
                 }
 
             }
@@ -184,30 +180,79 @@ void Board::GeneratePossibleMoves()
             {
                 if (pieceNum == BLACK_PAWN)
                 {
-                    GeneratePawnMoves(pieceNum, file, rank, currentSquare);
+                    GeneratePawnMoves(pieceNum, file, rank, currentSquare, response);
                 }
                 if (pieceNum == BLACK_KING)
                 {
-                    GenerateKingMoves(pieceNum, file, rank, currentSquare);
+                    GenerateKingMoves(pieceNum, file, rank, currentSquare, response);
                 }
                 if (pieceNum == BLACK_KNIGHT)
                 {
-                    GenerateKnightMoves(pieceNum, file, rank, currentSquare);
+                    GenerateKnightMoves(pieceNum, file, rank, currentSquare, response);
                 }
                 if (pieceNum == BLACK_BISHOP)
                 {
-                    GenerateDiagonalMoves(pieceNum, file, rank, currentSquare);
+                    GenerateDiagonalMoves(pieceNum, file, rank, currentSquare, response);
                 }
                 if (pieceNum == BLACK_ROOK)
                 {
-                    GenerateSlidingMoves(pieceNum, file, rank, currentSquare);
+                    GenerateSlidingMoves(pieceNum, file, rank, currentSquare, response);
                 }
                 if (pieceNum == BLACK_QUEEN)
                 {
-                    GenerateSlidingMoves(pieceNum, file, rank, currentSquare);
+                    GenerateSlidingMoves(pieceNum, file, rank, currentSquare, response);
+                    GenerateDiagonalMoves(pieceNum, file, rank, currentSquare, response);
                 }
             }
         }
+    }
+    if (!response)
+    {
+        std::vector<std::wstring> checkedMoves;
+        mWhiteTurn = !mWhiteTurn;
+        for (std::wstring const &move : mPossibleMoves)
+        {
+            std::vector<std::vector<int>> tempBoard = mBoard;
+            std::wstring tempWhiteKingSquare = mWhiteKingSquare;
+            std::wstring tempBlackKingSquare = mBlackKingSquare;
+            std::wstring originalSquare = {move[0], move[1]};
+            std::wstring newSquare = {move[2], move[3]};
+            if (originalSquare == mWhiteKingSquare)
+            {
+                mWhiteKingSquare = newSquare;
+            }
+            if (originalSquare == mBlackKingSquare)
+            {
+                mBlackKingSquare = newSquare;
+            }
+            UpdateBoard(move);
+            GeneratePossibleMoves(true);
+            bool addToCheckedMoves = true;
+            for (std::wstring const &response : mResponses)
+            {
+                std::wstring capture = { response[2], response[3] };
+                if (!mWhiteTurn && capture == mWhiteKingSquare)
+                {
+                    addToCheckedMoves = false;
+                    break;
+                }
+                if (mWhiteTurn && capture == mBlackKingSquare)
+                {
+                    addToCheckedMoves = false;
+                    break;
+                }
+            }
+            if (addToCheckedMoves)
+            {
+                checkedMoves.push_back(move);
+            }
+            mWhiteKingSquare = tempWhiteKingSquare;
+            mBlackKingSquare = tempBlackKingSquare;
+            mResponses.clear();
+            mBoard = tempBoard;
+        }
+        mWhiteTurn = !mWhiteTurn;
+        mPossibleMoves = checkedMoves;
     }
 }
 
@@ -237,15 +282,6 @@ void Board::UpdateBoard(std::wstring const &move)
 
     mBoard[oldFile][oldRank] = 0;
     mBoard[newFile][newRank] = piece;
-
-    for (auto rank : mBoard)
-    {
-        for (auto file : rank)
-        {
-            std::cout << file << " | ";
-        }
-        std::cout << std::endl;
-    }
 }
 
 bool Board::CheckBounds(int file, int rank)
@@ -257,7 +293,7 @@ bool Board::CheckBounds(int file, int rank)
     return true;
 }
 
-void Board::GenerateKingMoves(int const &pieceNum, int const &file, int const &rank, std::wstring const &currentSquare)
+void Board::GenerateKingMoves(int const &pieceNum, int const &file, int const &rank, std::wstring const &currentSquare, bool response)
 {
     if (pieceNum == WHITE_KING)
     {
@@ -267,7 +303,15 @@ void Board::GenerateKingMoves(int const &pieceNum, int const &file, int const &r
              std::wstring upRight = currentSquare;
              upRight[1] = currentSquare[1] - 1;
              upRight[0] = currentSquare[0] + 1;
-             mPossibleMoves.push_back(currentSquare + upRight);
+             if (response)
+             {
+                 mResponses.push_back(currentSquare + upRight);
+             }
+             else
+             {
+                 mPossibleMoves.push_back(currentSquare + upRight);
+             }
+
          }
 
          // Up-Left diagonal
@@ -276,7 +320,14 @@ void Board::GenerateKingMoves(int const &pieceNum, int const &file, int const &r
              std::wstring upLeft = currentSquare;
              upLeft[1] = currentSquare[1] - 1;
              upLeft[0] = currentSquare[0] - 1;
-             mPossibleMoves.push_back(currentSquare + upLeft);
+             if (response)
+             {
+                 mResponses.push_back(currentSquare + upLeft);
+             }
+             else
+             {
+                 mPossibleMoves.push_back(currentSquare + upLeft);
+             }
          }
 
          // Down-Right diagonal
@@ -285,7 +336,15 @@ void Board::GenerateKingMoves(int const &pieceNum, int const &file, int const &r
              std::wstring downRight = currentSquare;
              downRight[1] = currentSquare[1] + 1;
              downRight[0] = currentSquare[0] + 1;
-             mPossibleMoves.push_back(currentSquare + downRight);
+             if (response)
+             {
+                 mResponses.push_back(currentSquare + downRight);
+             }
+             else
+             {
+                mPossibleMoves.push_back(currentSquare + downRight);
+             }
+
          }
 
          // Down-Left diagonal
@@ -294,7 +353,15 @@ void Board::GenerateKingMoves(int const &pieceNum, int const &file, int const &r
              std::wstring downLeft = currentSquare;
              downLeft[1] = currentSquare[1] + 1;
              downLeft[0] = currentSquare[0] - 1;
-             mPossibleMoves.push_back(currentSquare + downLeft);
+             if (response)
+             {
+                 mResponses.push_back(currentSquare + downLeft);
+             }
+             else
+             {
+                 mPossibleMoves.push_back(currentSquare + downLeft);
+             }
+
          }
 
         // Up
@@ -302,7 +369,15 @@ void Board::GenerateKingMoves(int const &pieceNum, int const &file, int const &r
         {
             std::wstring up = currentSquare;
             up[1] = currentSquare[1] - 1;
-            mPossibleMoves.push_back(currentSquare + up);
+            if (response)
+            {
+                mResponses.push_back(currentSquare + up);
+            }
+            else
+            {
+                mPossibleMoves.push_back(currentSquare + up);
+            }
+
         }
 
         // Down
@@ -310,7 +385,15 @@ void Board::GenerateKingMoves(int const &pieceNum, int const &file, int const &r
         {
             std::wstring down = currentSquare;
             down[1] = currentSquare[1] + 1;
-            mPossibleMoves.push_back(currentSquare + down);
+            if (response)
+            {
+                mResponses.push_back(currentSquare + down);
+            }
+            else
+            {
+                mPossibleMoves.push_back(currentSquare + down);
+            }
+
         }
 
         // Right
@@ -318,7 +401,15 @@ void Board::GenerateKingMoves(int const &pieceNum, int const &file, int const &r
         {
             std::wstring right = currentSquare;
             right[0] = currentSquare[0] + 1;
-            mPossibleMoves.push_back(currentSquare + right);
+            if (response)
+            {
+                mResponses.push_back(currentSquare + right);
+            }
+            else
+            {
+                mPossibleMoves.push_back(currentSquare + right);
+            }
+
         }
 
         // Left
@@ -326,7 +417,15 @@ void Board::GenerateKingMoves(int const &pieceNum, int const &file, int const &r
         {
             std::wstring left = currentSquare;
             left[0] = currentSquare[0] - 1;
-            mPossibleMoves.push_back(currentSquare + left);
+            if (response)
+            {
+                mResponses.push_back(currentSquare + left);
+            }
+            else
+            {
+                mPossibleMoves.push_back(currentSquare + left);
+            }
+
         }
     }
     else if (pieceNum == BLACK_KING)
@@ -337,7 +436,15 @@ void Board::GenerateKingMoves(int const &pieceNum, int const &file, int const &r
              std::wstring upRight = currentSquare;
              upRight[1] = currentSquare[1] - 1;
              upRight[0] = currentSquare[0] + 1;
-             mPossibleMoves.push_back(currentSquare + upRight);
+             if (response)
+             {
+                 mResponses.push_back(currentSquare + upRight);
+             }
+             else
+             {
+                 mPossibleMoves.push_back(currentSquare + upRight);
+             }
+
          }
 
          // Up-Left diagonal
@@ -346,7 +453,15 @@ void Board::GenerateKingMoves(int const &pieceNum, int const &file, int const &r
              std::wstring upLeft = currentSquare;
              upLeft[1] = currentSquare[1] - 1;
              upLeft[0] = currentSquare[0] - 1;
-             mPossibleMoves.push_back(currentSquare + upLeft);
+             if (response)
+             {
+                 mResponses.push_back(currentSquare + upLeft);
+             }
+             else
+             {
+                 mPossibleMoves.push_back(currentSquare + upLeft);
+             }
+
          }
 
          // Down-Right diagonal
@@ -355,7 +470,15 @@ void Board::GenerateKingMoves(int const &pieceNum, int const &file, int const &r
              std::wstring downRight = currentSquare;
              downRight[1] = currentSquare[1] + 1;
              downRight[0] = currentSquare[0] + 1;
-             mPossibleMoves.push_back(currentSquare + downRight);
+             if (response)
+             {
+                 mResponses.push_back(currentSquare + downRight);
+             }
+             else
+             {
+                 mPossibleMoves.push_back(currentSquare + downRight);
+             }
+
          }
 
          // Down-Left diagonal
@@ -364,7 +487,15 @@ void Board::GenerateKingMoves(int const &pieceNum, int const &file, int const &r
              std::wstring downLeft = currentSquare;
              downLeft[1] = currentSquare[1] + 1;
              downLeft[0] = currentSquare[0] - 1;
-             mPossibleMoves.push_back(currentSquare + downLeft);
+             if (response)
+             {
+                 mResponses.push_back(currentSquare + downLeft);
+             }
+             else
+             {
+                 mPossibleMoves.push_back(currentSquare + downLeft);
+             }
+
          }
 
         // Up
@@ -372,7 +503,15 @@ void Board::GenerateKingMoves(int const &pieceNum, int const &file, int const &r
         {
             std::wstring up = currentSquare;
             up[1] = currentSquare[1] - 1;
-            mPossibleMoves.push_back(currentSquare + up);
+            if (response)
+            {
+                mResponses.push_back(currentSquare + up);
+            }
+            else
+            {
+                mPossibleMoves.push_back(currentSquare + up);
+            }
+
         }
 
         // Down
@@ -380,7 +519,15 @@ void Board::GenerateKingMoves(int const &pieceNum, int const &file, int const &r
         {
             std::wstring down = currentSquare;
             down[1] = currentSquare[1] + 1;
-            mPossibleMoves.push_back(currentSquare + down);
+            if (response)
+            {
+                mResponses.push_back(currentSquare + down);
+            }
+            else
+            {
+                mPossibleMoves.push_back(currentSquare + down);
+            }
+
         }
 
         // Right
@@ -388,7 +535,15 @@ void Board::GenerateKingMoves(int const &pieceNum, int const &file, int const &r
         {
             std::wstring right = currentSquare;
             right[0] = currentSquare[0] + 1;
-            mPossibleMoves.push_back(currentSquare + right);
+            if (response)
+            {
+                mResponses.push_back(currentSquare + right);
+            }
+            else
+            {
+                mPossibleMoves.push_back(currentSquare + right);
+            }
+
         }
 
         // Left
@@ -396,12 +551,19 @@ void Board::GenerateKingMoves(int const &pieceNum, int const &file, int const &r
         {
             std::wstring left = currentSquare;
             left[0] = currentSquare[0] - 1;
-            mPossibleMoves.push_back(currentSquare + left);
+            if (response)
+            {
+                mResponses.push_back(currentSquare + left);
+            }
+            else
+            {
+                mPossibleMoves.push_back(currentSquare + left);
+            }
         }
     }
 }
 
-void Board::GeneratePawnMoves(int const & pieceNum, int const &file, int const &rank, std::wstring const &currentSquare)
+void Board::GeneratePawnMoves(int const & pieceNum, int const &file, int const &rank, std::wstring const &currentSquare, bool response)
 {
     if (pieceNum == WHITE_PAWN)
     {
@@ -410,14 +572,30 @@ void Board::GeneratePawnMoves(int const & pieceNum, int const &file, int const &
             // White pawn advances one
             std::wstring oneSquareUp = currentSquare;
             oneSquareUp[1] = currentSquare[1] + 1;  // Move up one rank
-            mPossibleMoves.push_back(currentSquare + oneSquareUp);
+            if (response)
+            {
+                mResponses.push_back(currentSquare + oneSquareUp);
+            }
+            else
+            {
+                mPossibleMoves.push_back(currentSquare + oneSquareUp);
+            }
+
         }
         // White pawn advances two
         if (CheckBounds(file - 2, rank) && currentSquare[1] == '2' && mBoard[file - 2][rank] == 0)
         {
             std::wstring twoSquaresUp = currentSquare;
             twoSquaresUp[1] = currentSquare[1] + 2;  // Move up two ranks
-            mPossibleMoves.push_back(currentSquare + twoSquaresUp);
+            if (response)
+            {
+                mResponses.push_back(currentSquare + twoSquaresUp);
+            }
+            else
+            {
+                mPossibleMoves.push_back(currentSquare + twoSquaresUp);
+            }
+
         }
         // White pawn captures piece left diagonal
         if (CheckBounds(file - 1, rank - 1) && mBoard[file - 1][rank - 1] != 0 && (mBoard[file - 1][rank - 1] & WHITE) == 0)
@@ -425,7 +603,15 @@ void Board::GeneratePawnMoves(int const & pieceNum, int const &file, int const &
             std::wstring upLeft = currentSquare;
             upLeft[1] = currentSquare[1] + 1;
             upLeft[0] = currentSquare[0] - 1;
-            mPossibleMoves.push_back(currentSquare + upLeft);
+            if (response)
+            {
+                mResponses.push_back(currentSquare + upLeft);
+            }
+            else
+            {
+                mPossibleMoves.push_back(currentSquare + upLeft);
+            }
+
         }
 
         // White pawn captures piece right diagonal
@@ -434,7 +620,15 @@ void Board::GeneratePawnMoves(int const & pieceNum, int const &file, int const &
             std::wstring upRight = currentSquare;
             upRight[1] = currentSquare[1] + 1;
             upRight[0] = currentSquare[0] + 1;
-            mPossibleMoves.push_back(currentSquare + upRight);
+            if (response)
+            {
+                mResponses.push_back(currentSquare + upRight);
+            }
+            else
+            {
+                mPossibleMoves.push_back(currentSquare + upRight);
+            }
+
         }
     }
 
@@ -445,7 +639,15 @@ void Board::GeneratePawnMoves(int const & pieceNum, int const &file, int const &
         {
             std::wstring oneSquareDown = currentSquare;
             oneSquareDown[1] = currentSquare[1] - 1;  // Move down one rank
-            mPossibleMoves.push_back(currentSquare + oneSquareDown);
+            if (response)
+            {
+                mResponses.push_back(currentSquare + oneSquareDown);
+            }
+            else
+            {
+                mPossibleMoves.push_back(currentSquare + oneSquareDown);
+            }
+
         }
 
         // Black pawn advances two
@@ -453,7 +655,15 @@ void Board::GeneratePawnMoves(int const & pieceNum, int const &file, int const &
         {
             std::wstring twoSquaresDown = currentSquare;
             twoSquaresDown[1] = currentSquare[1] - 2;  // Move down two ranks
-            mPossibleMoves.push_back(currentSquare + twoSquaresDown);
+            if (response)
+            {
+                mResponses.push_back(currentSquare + twoSquaresDown);
+            }
+            else
+            {
+                mPossibleMoves.push_back(currentSquare + twoSquaresDown);
+            }
+
         }
 
         // Black pawn captures piece left diagonal
@@ -462,7 +672,15 @@ void Board::GeneratePawnMoves(int const & pieceNum, int const &file, int const &
             std::wstring upLeft = currentSquare;
             upLeft[1] = currentSquare[1] - 1;  // Move down two ranks
             upLeft[0] = currentSquare[0] - 1;
-            mPossibleMoves.push_back(currentSquare + upLeft);
+            if (response)
+            {
+                mResponses.push_back(currentSquare + upLeft);
+            }
+            else
+            {
+                mPossibleMoves.push_back(currentSquare + upLeft);
+            }
+
         }
 
         // Black pawn captures piece right diagonal
@@ -471,12 +689,20 @@ void Board::GeneratePawnMoves(int const & pieceNum, int const &file, int const &
             std::wstring upRight = currentSquare;
             upRight[1] = currentSquare[1] - 1;  // Move down two ranks
             upRight[0] = currentSquare[0] + 1;
-            mPossibleMoves.push_back(currentSquare + upRight);
+            if (response)
+            {
+                mResponses.push_back(currentSquare + upRight);
+            }
+            else
+            {
+                mPossibleMoves.push_back(currentSquare + upRight);
+            }
+
         }
     }
 }
 
-void Board::GenerateKnightMoves(int const &pieceNum, int const &file, int const &rank, std::wstring const &currentSquare)
+void Board::GenerateKnightMoves(int const &pieceNum, int const &file, int const &rank, std::wstring const &currentSquare, bool response)
 {
     if (pieceNum == WHITE_KNIGHT)
     {
@@ -486,7 +712,15 @@ void Board::GenerateKnightMoves(int const &pieceNum, int const &file, int const 
             std::wstring upRight = currentSquare;
             upRight[1] = currentSquare[1] - 2;
             upRight[0] = currentSquare[0] + 1;
-            mPossibleMoves.push_back(currentSquare + upRight);
+            if (response)
+            {
+                mResponses.push_back(currentSquare + upRight);
+            }
+            else
+            {
+                mPossibleMoves.push_back(currentSquare + upRight);
+            }
+
         }
         // Up 2 Left 1
         if (CheckBounds(file + 2, rank - 1) && (mBoard[file + 2][rank - 1] & BLACK || mBoard[file + 2][rank - 1] == 0))
@@ -494,7 +728,15 @@ void Board::GenerateKnightMoves(int const &pieceNum, int const &file, int const 
             std::wstring upLeft = currentSquare;
             upLeft[1] = currentSquare[1] - 2;
             upLeft[0] = currentSquare[0] - 1;
-            mPossibleMoves.push_back(currentSquare + upLeft);
+            if (response)
+            {
+                mResponses.push_back(currentSquare + upLeft);
+            }
+            else
+            {
+                mPossibleMoves.push_back(currentSquare + upLeft);
+            }
+
         }
         // Down 2 Right 1
         if (CheckBounds(file - 2, rank + 1) && (mBoard[file - 2][rank + 1] & BLACK || mBoard[file - 2][rank + 1] == 0))
@@ -502,7 +744,15 @@ void Board::GenerateKnightMoves(int const &pieceNum, int const &file, int const 
             std::wstring downRight = currentSquare;
             downRight[1] = currentSquare[1] + 2;
             downRight[0] = currentSquare[0] + 1;
-            mPossibleMoves.push_back(currentSquare + downRight);
+            if (response)
+            {
+                mResponses.push_back(currentSquare + downRight);
+            }
+            else
+            {
+                mPossibleMoves.push_back(currentSquare + downRight);
+            }
+
         }
         // Down 2 Left 1
         if (CheckBounds(file - 2, rank - 1) && (mBoard[file - 2][rank - 1] & BLACK || mBoard[file - 2][rank - 1] == 0))
@@ -510,7 +760,15 @@ void Board::GenerateKnightMoves(int const &pieceNum, int const &file, int const 
             std::wstring downLeft = currentSquare;
             downLeft[1] = currentSquare[1] + 2;
             downLeft[0] = currentSquare[0] - 1;
-            mPossibleMoves.push_back(currentSquare + downLeft);
+            if (response)
+            {
+                mResponses.push_back(currentSquare + downLeft);
+            }
+            else
+            {
+                mPossibleMoves.push_back(currentSquare + downLeft);
+            }
+
         }
 
         // Up 1 Right 2
@@ -519,7 +777,15 @@ void Board::GenerateKnightMoves(int const &pieceNum, int const &file, int const 
             std::wstring upRight = currentSquare;
             upRight[1] = currentSquare[1] - 1;
             upRight[0] = currentSquare[0] + 2;
-            mPossibleMoves.push_back(currentSquare + upRight);
+            if (response)
+            {
+                mResponses.push_back(currentSquare + upRight);
+            }
+            else
+            {
+                mPossibleMoves.push_back(currentSquare + upRight);
+            }
+
         }
         // Up 1 Left 2
         if (CheckBounds(file + 1, rank - 2) && (mBoard[file + 1][rank - 2] & BLACK || mBoard[file + 1][rank - 2] == 0))
@@ -527,7 +793,15 @@ void Board::GenerateKnightMoves(int const &pieceNum, int const &file, int const 
             std::wstring upLeft = currentSquare;
             upLeft[1] = currentSquare[1] - 1;
             upLeft[0] = currentSquare[0] - 2;
-            mPossibleMoves.push_back(currentSquare + upLeft);
+            if (response)
+            {
+                mResponses.push_back(currentSquare + upLeft);
+            }
+            else
+            {
+                mPossibleMoves.push_back(currentSquare + upLeft);
+            }
+
         }
         // Down 1 Right 2
         if (CheckBounds(file - 1, rank + 2) && (mBoard[file - 1][rank + 2] & BLACK || mBoard[file - 1][rank + 2] == 0))
@@ -535,7 +809,15 @@ void Board::GenerateKnightMoves(int const &pieceNum, int const &file, int const 
             std::wstring downRight = currentSquare;
             downRight[1] = currentSquare[1] + 1;
             downRight[0] = currentSquare[0] + 2;
-            mPossibleMoves.push_back(currentSquare + downRight);
+            if (response)
+            {
+                mResponses.push_back(currentSquare + downRight);
+            }
+            else
+            {
+                mPossibleMoves.push_back(currentSquare + downRight);
+            }
+
         }
         // Down 1 Left 2
         if (CheckBounds(file - 1, rank - 2) && (mBoard[file - 1][rank - 2] & BLACK || mBoard[file - 1][rank - 2] == 0))
@@ -543,7 +825,15 @@ void Board::GenerateKnightMoves(int const &pieceNum, int const &file, int const 
             std::wstring downLeft = currentSquare;
             downLeft[1] = currentSquare[1] + 1;
             downLeft[0] = currentSquare[0] - 2;
-            mPossibleMoves.push_back(currentSquare + downLeft);
+            if (response)
+            {
+                mResponses.push_back(currentSquare + downLeft);
+            }
+            else
+            {
+                mPossibleMoves.push_back(currentSquare + downLeft);
+            }
+
         }
     }
     else if (pieceNum == BLACK_KNIGHT)
@@ -554,7 +844,15 @@ void Board::GenerateKnightMoves(int const &pieceNum, int const &file, int const 
             std::wstring upRight = currentSquare;
             upRight[1] = currentSquare[1] - 2;
             upRight[0] = currentSquare[0] + 1;
-            mPossibleMoves.push_back(currentSquare + upRight);
+            if (response)
+            {
+                mResponses.push_back(currentSquare + upRight);
+            }
+            else
+            {
+                mPossibleMoves.push_back(currentSquare + upRight);
+            }
+
         }
         // Up 2 Left 1
         if (CheckBounds(file + 2, rank - 1) && (mBoard[file + 2][rank - 1] & WHITE || mBoard[file + 2][rank - 1] == 0))
@@ -562,7 +860,15 @@ void Board::GenerateKnightMoves(int const &pieceNum, int const &file, int const 
             std::wstring upLeft = currentSquare;
             upLeft[1] = currentSquare[1] - 2;
             upLeft[0] = currentSquare[0] - 1;
-            mPossibleMoves.push_back(currentSquare + upLeft);
+            if (response)
+            {
+                mResponses.push_back(currentSquare + upLeft);
+            }
+            else
+            {
+                mPossibleMoves.push_back(currentSquare + upLeft);
+            }
+
         }
         // Down 2 Right 1
         if (CheckBounds(file - 2, rank + 1) && (mBoard[file - 2][rank + 1] & WHITE || mBoard[file - 2][rank + 1] == 0))
@@ -570,7 +876,15 @@ void Board::GenerateKnightMoves(int const &pieceNum, int const &file, int const 
             std::wstring downRight = currentSquare;
             downRight[1] = currentSquare[1] + 2;
             downRight[0] = currentSquare[0] + 1;
-            mPossibleMoves.push_back(currentSquare + downRight);
+            if (response)
+            {
+                mResponses.push_back(currentSquare + downRight);
+            }
+            else
+            {
+                mPossibleMoves.push_back(currentSquare + downRight);
+            }
+
         }
         // Down 2 Left 1
         if (CheckBounds(file - 2, rank - 1) && (mBoard[file - 2][rank - 1] & WHITE || mBoard[file - 2][rank - 1] == 0))
@@ -578,7 +892,14 @@ void Board::GenerateKnightMoves(int const &pieceNum, int const &file, int const 
             std::wstring downLeft = currentSquare;
             downLeft[1] = currentSquare[1] + 2;
             downLeft[0] = currentSquare[0] - 1;
-            mPossibleMoves.push_back(currentSquare + downLeft);
+            if (response)
+            {
+                 mResponses.push_back(currentSquare + downLeft);
+            }
+            else
+            {
+                mPossibleMoves.push_back(currentSquare + downLeft);
+            }
         }
 
         // Up 1 Right 2
@@ -587,7 +908,14 @@ void Board::GenerateKnightMoves(int const &pieceNum, int const &file, int const 
             std::wstring upRight = currentSquare;
             upRight[1] = currentSquare[1] - 1;
             upRight[0] = currentSquare[0] + 2;
-            mPossibleMoves.push_back(currentSquare + upRight);
+            if (response)
+            {
+                mResponses.push_back(currentSquare + upRight);
+            }
+            else
+            {
+                mPossibleMoves.push_back(currentSquare + upRight);
+            }
         }
         // Up 1 Left 2
         if (CheckBounds(file + 1, rank - 2) && (mBoard[file + 1][rank - 2] & WHITE || mBoard[file + 1][rank - 2] == 0))
@@ -595,7 +923,14 @@ void Board::GenerateKnightMoves(int const &pieceNum, int const &file, int const 
             std::wstring upLeft = currentSquare;
             upLeft[1] = currentSquare[1] - 1;
             upLeft[0] = currentSquare[0] - 2;
-            mPossibleMoves.push_back(currentSquare + upLeft);
+            if (response)
+            {
+                mResponses.push_back(currentSquare + upLeft);
+            }
+            else
+            {
+                mPossibleMoves.push_back(currentSquare + upLeft);
+            }
         }
         // Down 1 Right 2
         if (CheckBounds(file - 1, rank + 2) && (mBoard[file - 1][rank + 2] & WHITE || mBoard[file - 1][rank + 2] == 0))
@@ -603,7 +938,14 @@ void Board::GenerateKnightMoves(int const &pieceNum, int const &file, int const 
             std::wstring downRight = currentSquare;
             downRight[1] = currentSquare[1] + 1;
             downRight[0] = currentSquare[0] + 2;
-            mPossibleMoves.push_back(currentSquare + downRight);
+            if (response)
+            {
+                mResponses.push_back(currentSquare + downRight);
+            }
+            else
+            {
+                mPossibleMoves.push_back(currentSquare + downRight);
+            }
         }
         // Down 1 Left 2
         if (CheckBounds(file - 1, rank - 2) && (mBoard[file - 1][rank - 2] & WHITE || mBoard[file - 1][rank - 2] == 0))
@@ -611,12 +953,20 @@ void Board::GenerateKnightMoves(int const &pieceNum, int const &file, int const 
             std::wstring downLeft = currentSquare;
             downLeft[1] = currentSquare[1] + 1;
             downLeft[0] = currentSquare[0] - 2;
+            if (response)
+            {
+
+            }
+            else
+            {
+
+            }
             mPossibleMoves.push_back(currentSquare + downLeft);
         }
     }
 }
 
-void Board::GenerateSlidingMoves(int const &pieceNum, int const &file, int const &rank, std::wstring const &currentSquare)
+void Board::GenerateSlidingMoves(int const &pieceNum, int const &file, int const &rank, std::wstring const &currentSquare, bool response)
 {
     if (pieceNum & WHITE)
     {
@@ -634,7 +984,14 @@ void Board::GenerateSlidingMoves(int const &pieceNum, int const &file, int const
                 {
                     break;
                 }
-                mPossibleMoves.push_back(currentSquare + slidingMove);
+                if (response)
+                {
+                    mResponses.push_back(currentSquare + slidingMove);
+                }
+                else
+                {
+                    mPossibleMoves.push_back(currentSquare + slidingMove);
+                }
 
                 if (mBoard[currentFile][currentRank] & BLACK)
                 {
@@ -654,7 +1011,14 @@ void Board::GenerateSlidingMoves(int const &pieceNum, int const &file, int const
                 {
                     break;
                 }
-                mPossibleMoves.push_back(currentSquare + slidingMove);
+                if (response)
+                {
+                    mResponses.push_back(currentSquare + slidingMove);
+                }
+                else
+                {
+                    mPossibleMoves.push_back(currentSquare + slidingMove);
+                }
 
                 if (mBoard[currentFile][currentRank] & BLACK)
                 {
@@ -674,7 +1038,14 @@ void Board::GenerateSlidingMoves(int const &pieceNum, int const &file, int const
                 {
                     break;
                 }
-                mPossibleMoves.push_back(currentSquare + slidingMove);
+                if (response)
+                {
+                    mResponses.push_back(currentSquare + slidingMove);
+                }
+                else
+                {
+                    mPossibleMoves.push_back(currentSquare + slidingMove);
+                }
 
                 if (mBoard[currentFile][currentRank] & BLACK)
                 {
@@ -694,7 +1065,14 @@ void Board::GenerateSlidingMoves(int const &pieceNum, int const &file, int const
                 {
                     break;
                 }
-                mPossibleMoves.push_back(currentSquare + slidingMove);
+                if (response)
+                {
+                    mResponses.push_back(currentSquare + slidingMove);
+                }
+                else
+                {
+                    mPossibleMoves.push_back(currentSquare + slidingMove);
+                }
 
                 if (mBoard[currentFile][currentRank] & BLACK)
                 {
@@ -720,7 +1098,14 @@ void Board::GenerateSlidingMoves(int const &pieceNum, int const &file, int const
                 {
                     break;
                 }
-                mPossibleMoves.push_back(currentSquare + slidingMove);
+                if (response)
+                {
+                    mResponses.push_back(currentSquare + slidingMove);
+                }
+                else
+                {
+                    mPossibleMoves.push_back(currentSquare + slidingMove);
+                }
 
                 if (mBoard[currentFile][currentRank] & WHITE)
                 {
@@ -740,7 +1125,14 @@ void Board::GenerateSlidingMoves(int const &pieceNum, int const &file, int const
                 {
                     break;
                 }
-                mPossibleMoves.push_back(currentSquare + slidingMove);
+                if (response)
+                {
+                    mResponses.push_back(currentSquare + slidingMove);
+                }
+                else
+                {
+                    mPossibleMoves.push_back(currentSquare + slidingMove);
+                }
 
                 if (mBoard[currentFile][currentRank] & WHITE)
                 {
@@ -760,7 +1152,14 @@ void Board::GenerateSlidingMoves(int const &pieceNum, int const &file, int const
                 {
                     break;
                 }
-                mPossibleMoves.push_back(currentSquare + slidingMove);
+                if (response)
+                {
+                    mResponses.push_back(currentSquare + slidingMove);
+                }
+                else
+                {
+                    mPossibleMoves.push_back(currentSquare + slidingMove);
+                }
 
                 if (mBoard[currentFile][currentRank] & WHITE)
                 {
@@ -780,7 +1179,14 @@ void Board::GenerateSlidingMoves(int const &pieceNum, int const &file, int const
                 {
                     break;
                 }
-                mPossibleMoves.push_back(currentSquare + slidingMove);
+                if (response)
+                {
+                    mResponses.push_back(currentSquare + slidingMove);
+                }
+                else
+                {
+                    mPossibleMoves.push_back(currentSquare + slidingMove);
+                }
 
                 if (mBoard[currentFile][currentRank] & WHITE)
                 {
@@ -792,13 +1198,13 @@ void Board::GenerateSlidingMoves(int const &pieceNum, int const &file, int const
     }
 }
 
-void Board::GenerateDiagonalMoves(int const &pieceNum, int const &file, int const &rank, std::wstring const &currentSquare)
+void Board::GenerateDiagonalMoves(int const &pieceNum, int const &file, int const &rank, std::wstring const &currentSquare, bool response)
 {
     if (pieceNum & WHITE)
     {
         int currentFile = file;
         int currentRank = rank;
-        if (pieceNum == WHITE_BISHOP)
+        if (pieceNum == WHITE_BISHOP || pieceNum == WHITE_QUEEN)
         {
             std::wstring slidingMove = currentSquare;
             currentRank--;
@@ -811,7 +1217,14 @@ void Board::GenerateDiagonalMoves(int const &pieceNum, int const &file, int cons
                 {
                     break;
                 }
-                mPossibleMoves.push_back(currentSquare + slidingMove);
+                if (response)
+                {
+                    mResponses.push_back(currentSquare + slidingMove);
+                }
+                else
+                {
+                    mPossibleMoves.push_back(currentSquare + slidingMove);
+                }
 
                 if (mBoard[currentFile][currentRank] & BLACK)
                 {
@@ -835,7 +1248,14 @@ void Board::GenerateDiagonalMoves(int const &pieceNum, int const &file, int cons
                 {
                     break;
                 }
-                mPossibleMoves.push_back(currentSquare + slidingMove);
+                if (response)
+                {
+                    mResponses.push_back(currentSquare + slidingMove);
+                }
+                else
+                {
+                    mPossibleMoves.push_back(currentSquare + slidingMove);
+                }
 
                 if (mBoard[currentFile][currentRank] & BLACK)
                 {
@@ -859,7 +1279,14 @@ void Board::GenerateDiagonalMoves(int const &pieceNum, int const &file, int cons
                 {
                     break;
                 }
-                mPossibleMoves.push_back(currentSquare + slidingMove);
+                if (response)
+                {
+                    mResponses.push_back(currentSquare + slidingMove);
+                }
+                else
+                {
+                    mPossibleMoves.push_back(currentSquare + slidingMove);
+                }
 
                 if (mBoard[currentFile][currentRank] & BLACK)
                 {
@@ -883,7 +1310,14 @@ void Board::GenerateDiagonalMoves(int const &pieceNum, int const &file, int cons
                 {
                     break;
                 }
-                mPossibleMoves.push_back(currentSquare + slidingMove);
+                if (response)
+                {
+                    mResponses.push_back(currentSquare + slidingMove);
+                }
+                else
+                {
+                    mPossibleMoves.push_back(currentSquare + slidingMove);
+                }
 
                 if (mBoard[currentFile][currentRank] & BLACK)
                 {
@@ -899,7 +1333,7 @@ void Board::GenerateDiagonalMoves(int const &pieceNum, int const &file, int cons
     {
         int currentFile = file;
         int currentRank = rank;
-        if (pieceNum == BLACK_BISHOP)
+        if (pieceNum == BLACK_BISHOP || pieceNum == BLACK_QUEEN)
         {
             std::wstring slidingMove = currentSquare;
             currentRank--;
@@ -912,7 +1346,14 @@ void Board::GenerateDiagonalMoves(int const &pieceNum, int const &file, int cons
                 {
                     break;
                 }
-                mPossibleMoves.push_back(currentSquare + slidingMove);
+                if (response)
+                {
+                    mResponses.push_back(currentSquare + slidingMove);
+                }
+                else
+                {
+                    mPossibleMoves.push_back(currentSquare + slidingMove);
+                }
 
                 if (mBoard[currentFile][currentRank] & WHITE)
                 {
@@ -936,7 +1377,14 @@ void Board::GenerateDiagonalMoves(int const &pieceNum, int const &file, int cons
                 {
                     break;
                 }
-                mPossibleMoves.push_back(currentSquare + slidingMove);
+                if (response)
+                {
+                    mResponses.push_back(currentSquare + slidingMove);
+                }
+                else
+                {
+                    mPossibleMoves.push_back(currentSquare + slidingMove);
+                }
 
                 if (mBoard[currentFile][currentRank] & WHITE)
                 {
@@ -960,7 +1408,14 @@ void Board::GenerateDiagonalMoves(int const &pieceNum, int const &file, int cons
                 {
                     break;
                 }
-                mPossibleMoves.push_back(currentSquare + slidingMove);
+                if (response)
+                {
+                    mResponses.push_back(currentSquare + slidingMove);
+                }
+                else
+                {
+                    mPossibleMoves.push_back(currentSquare + slidingMove);
+                }
 
                 if (mBoard[currentFile][currentRank] & WHITE)
                 {
@@ -984,7 +1439,14 @@ void Board::GenerateDiagonalMoves(int const &pieceNum, int const &file, int cons
                 {
                     break;
                 }
-                mPossibleMoves.push_back(currentSquare + slidingMove);
+                if (response)
+                {
+                    mResponses.push_back(currentSquare + slidingMove);
+                }
+                else
+                {
+                    mPossibleMoves.push_back(currentSquare + slidingMove);
+                }
 
                 if (mBoard[currentFile][currentRank] & WHITE)
                 {
@@ -993,6 +1455,17 @@ void Board::GenerateDiagonalMoves(int const &pieceNum, int const &file, int cons
                 currentFile++;
                 currentRank++;
             }
+        }
+    }
+}
+
+void Board::displayWinner()
+{
+    for (auto drawable : this->GetDrawablesInOrder())
+    {
+        if (drawable->GetName() == L"GameOver")
+        {
+            drawable->SetPosition(wxPoint(-50,180));
         }
     }
 }

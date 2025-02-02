@@ -117,7 +117,7 @@ void ViewEdit::OnLeftDown(wxMouseEvent &event)
     if (hitBoard != nullptr)
     {
         mBoard = hitBoard;
-        mBoard->GeneratePossibleMoves();
+        mBoard->GeneratePossibleMoves(false);
         mSelectedPiece = hitPiece;
         mSelectedDrawable = hitPiece;
         mBoard->MoveToBack(mSelectedPiece);
@@ -138,13 +138,15 @@ void ViewEdit::OnLeftUp(wxMouseEvent &event)
         std::shared_ptr<Square> newSquare = mBoard->GetClosestSquare(wxPoint(mSelectedPiece->GetPosition().x + 35, mSelectedPiece->GetPosition().y + 30));
         std::wstring move = mSelectedPiece->GetSquare()->GetName() + newSquare->GetName();
         std::vector<std::wstring> possibleMoves = mBoard->GetPossibleMoves();
-        std::cout << "POSSIBLE MOVES: " << std::endl;
-        for (auto const & move : possibleMoves)
+        if (possibleMoves.empty())
         {
-            std::cout << move << std::endl;
+            wxPoint oldPos = mSelectedPiece->GetSquare()->GetPosition();
+            mSelectedPiece->SetPosition(wxPoint(oldPos.x-(squareSize/2), oldPos.y-(squareSize/2)));
+            mBoard->displayWinner();
+            std::cout << "WIN" << std::endl;
+            GetPicture()->UpdateObservers();
         }
-        // std::cout << move << std::endl;
-        if (std::find(possibleMoves.begin(), possibleMoves.end(), move) != possibleMoves.end())
+        else if (std::find(possibleMoves.begin(), possibleMoves.end(), move) != possibleMoves.end())
         {
             if (newSquare->GetPiece())
             {
@@ -156,9 +158,18 @@ void ViewEdit::OnLeftUp(wxMouseEvent &event)
             }
             newSquare->SetPiece(&*mSelectedPiece);
             mSelectedPiece->SetPosition(wxPoint(newSquare->GetCenter().x-(squareSize/2), newSquare->GetCenter().y-(squareSize/2)));
+            int pieceNum = std::stoi(mSelectedPiece->GetName());
+            if (pieceNum == 17)
+            {
+                mBoard->SetBlackKingSquare({move[2], move[3]});
+            }
+            if (pieceNum == 9)
+            {
+                mBoard->SetWhiteKingSquare({move[2], move[3]});
+            }
             mBoard->SetWhiteTurn(!whiteTurn);
             mBoard->UpdateBoard(move);
-            mBoard->GeneratePossibleMoves();
+            mBoard->GeneratePossibleMoves(false);
             GetPicture()->UpdateObservers();
         }
         else

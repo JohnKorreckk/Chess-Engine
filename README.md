@@ -13,7 +13,8 @@ This repository contains a chess engine implemented in C++. It is designed for e
 
 ### Prerequisites
 Ensure you have the following installed:
-- A compatible C++ compiler (e.g., GCC, Clang, MSVC)
+- A compatible C++ compiler
+- CMake
 
 ### Building the Project
 1. Clone the repository:

@@ -84,7 +84,7 @@ public:
   * The actor position
   * @param pos The new actor position
   */
- void SetItemPosition(wxPoint pos) { /** std::cout << mPosition.x << ", " << mPosition.y << std::endl **/; mPosition = pos; }
+ void SetItemPosition(wxPoint pos) { mPosition = pos; }
 
 
  /**

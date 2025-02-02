@@ -130,6 +130,10 @@ std::shared_ptr<Board> BoardFactory::Create(std::wstring resourcesDir)
                     board->AddPiece(piece);
                 }
             }
+            auto gameOverScreen = std::make_shared<ImageDrawable>(L"GameOver", imagesDir + L"/gameover.png");
+            gameOverScreen->SetPosition(wxPoint(-100000, -10000));
+            gameOverScreen->SetActor(&*board);
+            board->AddDrawable(gameOverScreen);
  }
     return board;
 }
