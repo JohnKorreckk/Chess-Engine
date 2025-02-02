@@ -19,10 +19,11 @@ Ensure you have the following installed:
 1. Clone the repository:
    ```bash
    git clone <repository-url>
-   cd Chess-Engine-main
+   cd Chess-Engine
 2. Create a build directory:
    ```bash
-   mkdir build && cd build
+   mkdir build
+   cd build
 3. Run CMake to configure the project:
    ```bash
    cmake ..
@@ -30,7 +31,6 @@ Ensure you have the following installed:
    ```bash
    make
 
-### Building the Project
-Execute the compiled binary from the build directory:
-```bash
-./chess_engine
+4. Run:
+   ```bash
+   open Chess_Engine.app
