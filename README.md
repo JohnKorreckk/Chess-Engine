@@ -15,6 +15,7 @@ This repository contains a chess engine implemented in C++. It is designed for e
 Ensure you have the following installed:
 - A compatible C++ compiler
 - CMake
+- wxWidgets
 
 ### Building the Project
 1. Clone the repository:
