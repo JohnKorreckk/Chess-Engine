@@ -138,7 +138,12 @@ void ViewEdit::OnLeftUp(wxMouseEvent &event)
         std::shared_ptr<Square> newSquare = mBoard->GetClosestSquare(wxPoint(mSelectedPiece->GetPosition().x + 35, mSelectedPiece->GetPosition().y + 30));
         std::wstring move = mSelectedPiece->GetSquare()->GetName() + newSquare->GetName();
         std::vector<std::wstring> possibleMoves = mBoard->GetPossibleMoves();
-        std::cout << move << std::endl;
+        std::cout << "POSSIBLE MOVES: " << std::endl;
+        for (auto const & move : possibleMoves)
+        {
+            std::cout << move << std::endl;
+        }
+        // std::cout << move << std::endl;
         if (std::find(possibleMoves.begin(), possibleMoves.end(), move) != possibleMoves.end())
         {
             if (newSquare->GetPiece())

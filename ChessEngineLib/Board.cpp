@@ -144,59 +144,71 @@ std::shared_ptr<Square> Board::GetClosestSquare(wxPoint pos)
 void Board::GeneratePossibleMoves()
 {
     mPossibleMoves.clear();
-    for (auto const &piece : mPieces)
-    {
-        int pieceNum = std::stoi(piece->GetName());
-        std::wstring currentSquare = piece->GetSquare()->GetName();
-        if (mWhiteTurn && (pieceNum & WHITE) != 0)
-        {
-            if (pieceNum == WHITE_PAWN)
+    for (int file = 0; file < 8; file++) {
+        for (int rank = 0; rank < 8; rank++) {
+
+            int pieceNum = mBoard[file][rank];
+            std::wstring currentFile = std::to_wstring(std::abs(file - 8));
+            std::wstring currentRank = std::wstring(1, 'a' + rank);
+            std::wstring currentSquare = currentRank + currentFile;
+
+            if (mWhiteTurn && (pieceNum & WHITE) != 0)
             {
-                // White pawn advances one
-                if (true)
+                if (pieceNum == WHITE_PAWN)
                 {
-                    std::wstring oneSquareUp = currentSquare;
-                    oneSquareUp[1] = currentSquare[1] + 1;  // Move up one rank
-                    mPossibleMoves.push_back(currentSquare + oneSquareUp);
+                    GeneratePawnMoves(pieceNum, file, rank, currentSquare);
+                }
+                if (pieceNum == WHITE_KING)
+                {
+                    GenerateKingMoves(pieceNum, file, rank, currentSquare);
+                }
+                if (pieceNum == WHITE_KNIGHT)
+                {
+                    GenerateKnightMoves(pieceNum, file, rank, currentSquare);
+                }
+                if (pieceNum == WHITE_BISHOP)
+                {
+                    GenerateDiagonalMoves(pieceNum, file, rank, currentSquare);
+                }
+                if (pieceNum == WHITE_ROOK)
+                {
+                    GenerateSlidingMoves(pieceNum, file, rank, currentSquare);
+                }
+                if (pieceNum == WHITE_QUEEN)
+                {
+                    GenerateSlidingMoves(pieceNum, file, rank, currentSquare);
                 }
 
-                // White pawn advances two
-                if (currentSquare[1] == '2' && true)
-                {
-                    std::wstring twoSquaresUp = currentSquare;
-                    twoSquaresUp[1] = currentSquare[1] + 2;  // Move up two ranks
-                    mPossibleMoves.push_back(currentSquare + twoSquaresUp);
-                }
             }
-        }
-        else if (!mWhiteTurn && (pieceNum & BLACK) != 0)
-        {
-            if (pieceNum == BLACK_PAWN)
+            else if (!mWhiteTurn && (pieceNum & BLACK) != 0)
             {
-                // Black pawn advances one
-                if (true)
+                if (pieceNum == BLACK_PAWN)
                 {
-                    std::wstring oneSquareDown = currentSquare;
-                    oneSquareDown[1] = currentSquare[1] - 1;  // Move down one rank
-                    mPossibleMoves.push_back(currentSquare + oneSquareDown);
+                    GeneratePawnMoves(pieceNum, file, rank, currentSquare);
                 }
-
-                // Black pawn advances two
-                if (currentSquare[1] == '7')
+                if (pieceNum == BLACK_KING)
                 {
-                    std::wstring twoSquaresDown = currentSquare;
-                    twoSquaresDown[1] = currentSquare[1] - 2;  // Move down two ranks
-                    mPossibleMoves.push_back(currentSquare + twoSquaresDown);
+                    GenerateKingMoves(pieceNum, file, rank, currentSquare);
+                }
+                if (pieceNum == BLACK_KNIGHT)
+                {
+                    GenerateKnightMoves(pieceNum, file, rank, currentSquare);
+                }
+                if (pieceNum == BLACK_BISHOP)
+                {
+                    GenerateDiagonalMoves(pieceNum, file, rank, currentSquare);
+                }
+                if (pieceNum == BLACK_ROOK)
+                {
+                    GenerateSlidingMoves(pieceNum, file, rank, currentSquare);
+                }
+                if (pieceNum == BLACK_QUEEN)
+                {
+                    GenerateSlidingMoves(pieceNum, file, rank, currentSquare);
                 }
             }
         }
     }
-}
-
-std::vector<int> Board::GenerateSlidingMoves(std::vector<std::vector<int>> board)
-{
-    std::vector<int> slidingMoves;
-    return slidingMoves;
 }
 
 std::shared_ptr<Piece> Board::HitTest(wxPoint pos)
@@ -233,5 +245,754 @@ void Board::UpdateBoard(std::wstring const &move)
             std::cout << file << " | ";
         }
         std::cout << std::endl;
+    }
+}
+
+bool Board::CheckBounds(int file, int rank)
+{
+    if (file < 0 || rank < 0 || file >= 8 || rank >= 8)
+    {
+        return false;
+    }
+    return true;
+}
+
+void Board::GenerateKingMoves(int const &pieceNum, int const &file, int const &rank, std::wstring const &currentSquare)
+{
+    if (pieceNum == WHITE_KING)
+    {
+         // Up-Right diagonal
+         if (CheckBounds(file + 1, rank + 1) && (mBoard[file + 1][rank + 1] & BLACK || mBoard[file + 1][rank + 1] == 0))
+         {
+             std::wstring upRight = currentSquare;
+             upRight[1] = currentSquare[1] - 1;
+             upRight[0] = currentSquare[0] + 1;
+             mPossibleMoves.push_back(currentSquare + upRight);
+         }
+
+         // Up-Left diagonal
+         if (CheckBounds(file + 1, rank - 1) && (mBoard[file + 1][rank - 1] & BLACK || mBoard[file + 1][rank - 1] == 0))
+         {
+             std::wstring upLeft = currentSquare;
+             upLeft[1] = currentSquare[1] - 1;
+             upLeft[0] = currentSquare[0] - 1;
+             mPossibleMoves.push_back(currentSquare + upLeft);
+         }
+
+         // Down-Right diagonal
+         if (CheckBounds(file - 1, rank + 1) && (mBoard[file - 1][rank + 1] & BLACK || mBoard[file - 1][rank + 1] == 0))
+         {
+             std::wstring downRight = currentSquare;
+             downRight[1] = currentSquare[1] + 1;
+             downRight[0] = currentSquare[0] + 1;
+             mPossibleMoves.push_back(currentSquare + downRight);
+         }
+
+         // Down-Left diagonal
+         if (CheckBounds(file - 1, rank - 1) && (mBoard[file - 1][rank - 1] & BLACK || mBoard[file - 1][rank - 1] == 0))
+         {
+             std::wstring downLeft = currentSquare;
+             downLeft[1] = currentSquare[1] + 1;
+             downLeft[0] = currentSquare[0] - 1;
+             mPossibleMoves.push_back(currentSquare + downLeft);
+         }
+
+        // Up
+        if (CheckBounds(file + 1, rank) && (mBoard[file + 1][rank] & BLACK || mBoard[file + 1][rank] == 0))
+        {
+            std::wstring up = currentSquare;
+            up[1] = currentSquare[1] - 1;
+            mPossibleMoves.push_back(currentSquare + up);
+        }
+
+        // Down
+        if (CheckBounds(file - 1, rank) && (mBoard[file - 1][rank] & BLACK || mBoard[file - 1][rank] == 0))
+        {
+            std::wstring down = currentSquare;
+            down[1] = currentSquare[1] + 1;
+            mPossibleMoves.push_back(currentSquare + down);
+        }
+
+        // Right
+        if (CheckBounds(file, rank + 1) && (mBoard[file][rank + 1] & BLACK || mBoard[file][rank + 1] == 0))
+        {
+            std::wstring right = currentSquare;
+            right[0] = currentSquare[0] + 1;
+            mPossibleMoves.push_back(currentSquare + right);
+        }
+
+        // Left
+        if (CheckBounds(file, rank - 1) && (mBoard[file][rank - 1] & BLACK || mBoard[file][rank - 1] == 0))
+        {
+            std::wstring left = currentSquare;
+            left[0] = currentSquare[0] - 1;
+            mPossibleMoves.push_back(currentSquare + left);
+        }
+    }
+    else if (pieceNum == BLACK_KING)
+    {
+         // Up-Right diagonal
+         if (CheckBounds(file + 1, rank + 1) && (mBoard[file + 1][rank + 1] & WHITE || mBoard[file + 1][rank + 1] == 0))
+         {
+             std::wstring upRight = currentSquare;
+             upRight[1] = currentSquare[1] - 1;
+             upRight[0] = currentSquare[0] + 1;
+             mPossibleMoves.push_back(currentSquare + upRight);
+         }
+
+         // Up-Left diagonal
+         if (CheckBounds(file + 1, rank - 1) && (mBoard[file + 1][rank - 1] & WHITE || mBoard[file + 1][rank - 1] == 0))
+         {
+             std::wstring upLeft = currentSquare;
+             upLeft[1] = currentSquare[1] - 1;
+             upLeft[0] = currentSquare[0] - 1;
+             mPossibleMoves.push_back(currentSquare + upLeft);
+         }
+
+         // Down-Right diagonal
+         if (CheckBounds(file - 1, rank + 1) && (mBoard[file - 1][rank + 1] & WHITE || mBoard[file - 1][rank + 1] == 0))
+         {
+             std::wstring downRight = currentSquare;
+             downRight[1] = currentSquare[1] + 1;
+             downRight[0] = currentSquare[0] + 1;
+             mPossibleMoves.push_back(currentSquare + downRight);
+         }
+
+         // Down-Left diagonal
+         if (CheckBounds(file - 1, rank - 1) && (mBoard[file - 1][rank - 1] & WHITE || mBoard[file - 1][rank - 1] == 0))
+         {
+             std::wstring downLeft = currentSquare;
+             downLeft[1] = currentSquare[1] + 1;
+             downLeft[0] = currentSquare[0] - 1;
+             mPossibleMoves.push_back(currentSquare + downLeft);
+         }
+
+        // Up
+        if (CheckBounds(file + 1, rank) && (mBoard[file + 1][rank] & WHITE || mBoard[file + 1][rank] == 0))
+        {
+            std::wstring up = currentSquare;
+            up[1] = currentSquare[1] - 1;
+            mPossibleMoves.push_back(currentSquare + up);
+        }
+
+        // Down
+        if (CheckBounds(file - 1, rank) && (mBoard[file - 1][rank] & WHITE || mBoard[file - 1][rank] == 0))
+        {
+            std::wstring down = currentSquare;
+            down[1] = currentSquare[1] + 1;
+            mPossibleMoves.push_back(currentSquare + down);
+        }
+
+        // Right
+        if (CheckBounds(file, rank + 1) && (mBoard[file][rank + 1] & WHITE || mBoard[file][rank + 1] == 0))
+        {
+            std::wstring right = currentSquare;
+            right[0] = currentSquare[0] + 1;
+            mPossibleMoves.push_back(currentSquare + right);
+        }
+
+        // Left
+        if (CheckBounds(file, rank - 1) && (mBoard[file][rank - 1] & WHITE || mBoard[file][rank - 1] == 0))
+        {
+            std::wstring left = currentSquare;
+            left[0] = currentSquare[0] - 1;
+            mPossibleMoves.push_back(currentSquare + left);
+        }
+    }
+}
+
+void Board::GeneratePawnMoves(int const & pieceNum, int const &file, int const &rank, std::wstring const &currentSquare)
+{
+    if (pieceNum == WHITE_PAWN)
+    {
+        if (CheckBounds(file - 1, rank) && mBoard[file - 1][rank] == 0)
+        {
+            // White pawn advances one
+            std::wstring oneSquareUp = currentSquare;
+            oneSquareUp[1] = currentSquare[1] + 1;  // Move up one rank
+            mPossibleMoves.push_back(currentSquare + oneSquareUp);
+        }
+        // White pawn advances two
+        if (CheckBounds(file - 2, rank) && currentSquare[1] == '2' && mBoard[file - 2][rank] == 0)
+        {
+            std::wstring twoSquaresUp = currentSquare;
+            twoSquaresUp[1] = currentSquare[1] + 2;  // Move up two ranks
+            mPossibleMoves.push_back(currentSquare + twoSquaresUp);
+        }
+        // White pawn captures piece left diagonal
+        if (CheckBounds(file - 1, rank - 1) && mBoard[file - 1][rank - 1] != 0 && (mBoard[file - 1][rank - 1] & WHITE) == 0)
+        {
+            std::wstring upLeft = currentSquare;
+            upLeft[1] = currentSquare[1] + 1;
+            upLeft[0] = currentSquare[0] - 1;
+            mPossibleMoves.push_back(currentSquare + upLeft);
+        }
+
+        // White pawn captures piece right diagonal
+        if (CheckBounds(file - 1, rank + 1) && mBoard[file - 1][rank + 1] != 0 && (mBoard[file - 1][rank + 1] & WHITE) == 0)
+        {
+            std::wstring upRight = currentSquare;
+            upRight[1] = currentSquare[1] + 1;
+            upRight[0] = currentSquare[0] + 1;
+            mPossibleMoves.push_back(currentSquare + upRight);
+        }
+    }
+
+    else if (pieceNum == BLACK_PAWN)
+    {
+        // Black pawn advances one
+        if (CheckBounds(file + 1, rank) && mBoard[file + 1][rank] == 0)
+        {
+            std::wstring oneSquareDown = currentSquare;
+            oneSquareDown[1] = currentSquare[1] - 1;  // Move down one rank
+            mPossibleMoves.push_back(currentSquare + oneSquareDown);
+        }
+
+        // Black pawn advances two
+        if (CheckBounds(file + 2, rank) && currentSquare[1] == '7' && mBoard[file + 2][rank] == 0)
+        {
+            std::wstring twoSquaresDown = currentSquare;
+            twoSquaresDown[1] = currentSquare[1] - 2;  // Move down two ranks
+            mPossibleMoves.push_back(currentSquare + twoSquaresDown);
+        }
+
+        // Black pawn captures piece left diagonal
+        if (CheckBounds(file + 1, rank - 1) && mBoard[file + 1][rank - 1] != 0 && (mBoard[file + 1][rank - 1] & BLACK) == 0)
+        {
+            std::wstring upLeft = currentSquare;
+            upLeft[1] = currentSquare[1] - 1;  // Move down two ranks
+            upLeft[0] = currentSquare[0] - 1;
+            mPossibleMoves.push_back(currentSquare + upLeft);
+        }
+
+        // Black pawn captures piece right diagonal
+        if (CheckBounds(file + 1, rank + 1) && mBoard[file + 1][rank + 1] != 0 && (mBoard[file + 1][rank + 1] & BLACK) == 0)
+        {
+            std::wstring upRight = currentSquare;
+            upRight[1] = currentSquare[1] - 1;  // Move down two ranks
+            upRight[0] = currentSquare[0] + 1;
+            mPossibleMoves.push_back(currentSquare + upRight);
+        }
+    }
+}
+
+void Board::GenerateKnightMoves(int const &pieceNum, int const &file, int const &rank, std::wstring const &currentSquare)
+{
+    if (pieceNum == WHITE_KNIGHT)
+    {
+        // Up 2 Right 1
+        if (CheckBounds(file + 2, rank + 1) && (mBoard[file + 2][rank + 1] & BLACK || mBoard[file + 2][rank + 1] == 0))
+        {
+            std::wstring upRight = currentSquare;
+            upRight[1] = currentSquare[1] - 2;
+            upRight[0] = currentSquare[0] + 1;
+            mPossibleMoves.push_back(currentSquare + upRight);
+        }
+        // Up 2 Left 1
+        if (CheckBounds(file + 2, rank - 1) && (mBoard[file + 2][rank - 1] & BLACK || mBoard[file + 2][rank - 1] == 0))
+        {
+            std::wstring upLeft = currentSquare;
+            upLeft[1] = currentSquare[1] - 2;
+            upLeft[0] = currentSquare[0] - 1;
+            mPossibleMoves.push_back(currentSquare + upLeft);
+        }
+        // Down 2 Right 1
+        if (CheckBounds(file - 2, rank + 1) && (mBoard[file - 2][rank + 1] & BLACK || mBoard[file - 2][rank + 1] == 0))
+        {
+            std::wstring downRight = currentSquare;
+            downRight[1] = currentSquare[1] + 2;
+            downRight[0] = currentSquare[0] + 1;
+            mPossibleMoves.push_back(currentSquare + downRight);
+        }
+        // Down 2 Left 1
+        if (CheckBounds(file - 2, rank - 1) && (mBoard[file - 2][rank - 1] & BLACK || mBoard[file - 2][rank - 1] == 0))
+        {
+            std::wstring downLeft = currentSquare;
+            downLeft[1] = currentSquare[1] + 2;
+            downLeft[0] = currentSquare[0] - 1;
+            mPossibleMoves.push_back(currentSquare + downLeft);
+        }
+
+        // Up 1 Right 2
+        if (CheckBounds(file + 1, rank + 2) && (mBoard[file + 1][rank + 2] & BLACK || mBoard[file + 1][rank + 2] == 0))
+        {
+            std::wstring upRight = currentSquare;
+            upRight[1] = currentSquare[1] - 1;
+            upRight[0] = currentSquare[0] + 2;
+            mPossibleMoves.push_back(currentSquare + upRight);
+        }
+        // Up 1 Left 2
+        if (CheckBounds(file + 1, rank - 2) && (mBoard[file + 1][rank - 2] & BLACK || mBoard[file + 1][rank - 2] == 0))
+        {
+            std::wstring upLeft = currentSquare;
+            upLeft[1] = currentSquare[1] - 1;
+            upLeft[0] = currentSquare[0] - 2;
+            mPossibleMoves.push_back(currentSquare + upLeft);
+        }
+        // Down 1 Right 2
+        if (CheckBounds(file - 1, rank + 2) && (mBoard[file - 1][rank + 2] & BLACK || mBoard[file - 1][rank + 2] == 0))
+        {
+            std::wstring downRight = currentSquare;
+            downRight[1] = currentSquare[1] + 1;
+            downRight[0] = currentSquare[0] + 2;
+            mPossibleMoves.push_back(currentSquare + downRight);
+        }
+        // Down 1 Left 2
+        if (CheckBounds(file - 1, rank - 2) && (mBoard[file - 1][rank - 2] & BLACK || mBoard[file - 1][rank - 2] == 0))
+        {
+            std::wstring downLeft = currentSquare;
+            downLeft[1] = currentSquare[1] + 1;
+            downLeft[0] = currentSquare[0] - 2;
+            mPossibleMoves.push_back(currentSquare + downLeft);
+        }
+    }
+    else if (pieceNum == BLACK_KNIGHT)
+    {
+        // Up 2 Right 1
+        if (CheckBounds(file + 2, rank + 1) && (mBoard[file + 2][rank + 1] & WHITE || mBoard[file + 2][rank + 1] == 0))
+        {
+            std::wstring upRight = currentSquare;
+            upRight[1] = currentSquare[1] - 2;
+            upRight[0] = currentSquare[0] + 1;
+            mPossibleMoves.push_back(currentSquare + upRight);
+        }
+        // Up 2 Left 1
+        if (CheckBounds(file + 2, rank - 1) && (mBoard[file + 2][rank - 1] & WHITE || mBoard[file + 2][rank - 1] == 0))
+        {
+            std::wstring upLeft = currentSquare;
+            upLeft[1] = currentSquare[1] - 2;
+            upLeft[0] = currentSquare[0] - 1;
+            mPossibleMoves.push_back(currentSquare + upLeft);
+        }
+        // Down 2 Right 1
+        if (CheckBounds(file - 2, rank + 1) && (mBoard[file - 2][rank + 1] & WHITE || mBoard[file - 2][rank + 1] == 0))
+        {
+            std::wstring downRight = currentSquare;
+            downRight[1] = currentSquare[1] + 2;
+            downRight[0] = currentSquare[0] + 1;
+            mPossibleMoves.push_back(currentSquare + downRight);
+        }
+        // Down 2 Left 1
+        if (CheckBounds(file - 2, rank - 1) && (mBoard[file - 2][rank - 1] & WHITE || mBoard[file - 2][rank - 1] == 0))
+        {
+            std::wstring downLeft = currentSquare;
+            downLeft[1] = currentSquare[1] + 2;
+            downLeft[0] = currentSquare[0] - 1;
+            mPossibleMoves.push_back(currentSquare + downLeft);
+        }
+
+        // Up 1 Right 2
+        if (CheckBounds(file + 1, rank + 2) && (mBoard[file + 1][rank + 2] & WHITE || mBoard[file + 1][rank + 2] == 0))
+        {
+            std::wstring upRight = currentSquare;
+            upRight[1] = currentSquare[1] - 1;
+            upRight[0] = currentSquare[0] + 2;
+            mPossibleMoves.push_back(currentSquare + upRight);
+        }
+        // Up 1 Left 2
+        if (CheckBounds(file + 1, rank - 2) && (mBoard[file + 1][rank - 2] & WHITE || mBoard[file + 1][rank - 2] == 0))
+        {
+            std::wstring upLeft = currentSquare;
+            upLeft[1] = currentSquare[1] - 1;
+            upLeft[0] = currentSquare[0] - 2;
+            mPossibleMoves.push_back(currentSquare + upLeft);
+        }
+        // Down 1 Right 2
+        if (CheckBounds(file - 1, rank + 2) && (mBoard[file - 1][rank + 2] & WHITE || mBoard[file - 1][rank + 2] == 0))
+        {
+            std::wstring downRight = currentSquare;
+            downRight[1] = currentSquare[1] + 1;
+            downRight[0] = currentSquare[0] + 2;
+            mPossibleMoves.push_back(currentSquare + downRight);
+        }
+        // Down 1 Left 2
+        if (CheckBounds(file - 1, rank - 2) && (mBoard[file - 1][rank - 2] & WHITE || mBoard[file - 1][rank - 2] == 0))
+        {
+            std::wstring downLeft = currentSquare;
+            downLeft[1] = currentSquare[1] + 1;
+            downLeft[0] = currentSquare[0] - 2;
+            mPossibleMoves.push_back(currentSquare + downLeft);
+        }
+    }
+}
+
+void Board::GenerateSlidingMoves(int const &pieceNum, int const &file, int const &rank, std::wstring const &currentSquare)
+{
+    if (pieceNum & WHITE)
+    {
+        int currentFile = file;
+        int currentRank = rank;
+        if (pieceNum == WHITE_ROOK || pieceNum == WHITE_QUEEN)
+        {
+            std::wstring slidingMove = currentSquare;
+            currentFile--;
+            while (currentFile >= 0)
+            {
+                slidingMove[1] = slidingMove[1] + 1;
+
+                if (mBoard[currentFile][currentRank] & WHITE)
+                {
+                    break;
+                }
+                mPossibleMoves.push_back(currentSquare + slidingMove);
+
+                if (mBoard[currentFile][currentRank] & BLACK)
+                {
+                    break;
+                }
+                currentFile--;
+            }
+
+            currentFile = file;
+            slidingMove = currentSquare;
+            currentFile++;
+            while (currentFile <= 7)
+            {
+                slidingMove[1] = slidingMove[1] - 1;
+
+                if (mBoard[currentFile][currentRank] & WHITE)
+                {
+                    break;
+                }
+                mPossibleMoves.push_back(currentSquare + slidingMove);
+
+                if (mBoard[currentFile][currentRank] & BLACK)
+                {
+                    break;
+                }
+                currentFile++;
+            }
+            currentFile = file;
+            currentRank--;
+            slidingMove = currentSquare;
+
+            while (currentRank >= 0)
+            {
+                slidingMove[0] = slidingMove[0] - 1;
+
+                if (mBoard[currentFile][currentRank] & WHITE)
+                {
+                    break;
+                }
+                mPossibleMoves.push_back(currentSquare + slidingMove);
+
+                if (mBoard[currentFile][currentRank] & BLACK)
+                {
+                    break;
+                }
+                currentRank--;
+            }
+            currentRank = rank;
+            slidingMove = currentSquare;
+            currentRank++;
+
+            while (currentRank <= 7)
+            {
+                slidingMove[0] = slidingMove[0] + 1;
+
+                if (mBoard[currentFile][currentRank] & WHITE)
+                {
+                    break;
+                }
+                mPossibleMoves.push_back(currentSquare + slidingMove);
+
+                if (mBoard[currentFile][currentRank] & BLACK)
+                {
+                    break;
+                }
+                currentRank++;
+            }
+        }
+    }
+    else if (pieceNum & BLACK)
+    {
+        int currentFile = file;
+        int currentRank = rank;
+        if (pieceNum == BLACK_ROOK || pieceNum == BLACK_QUEEN)
+        {
+            std::wstring slidingMove = currentSquare;
+            currentFile--;
+            while (currentFile >= 0)
+            {
+                slidingMove[1] = slidingMove[1] + 1;
+
+                if (mBoard[currentFile][currentRank] & BLACK)
+                {
+                    break;
+                }
+                mPossibleMoves.push_back(currentSquare + slidingMove);
+
+                if (mBoard[currentFile][currentRank] & WHITE)
+                {
+                    break;
+                }
+                currentFile--;
+            }
+
+            currentFile = file;
+            slidingMove = currentSquare;
+            currentFile++;
+            while (currentFile <= 7)
+            {
+                slidingMove[1] = slidingMove[1] - 1;
+
+                if (mBoard[currentFile][currentRank] & BLACK)
+                {
+                    break;
+                }
+                mPossibleMoves.push_back(currentSquare + slidingMove);
+
+                if (mBoard[currentFile][currentRank] & WHITE)
+                {
+                    break;
+                }
+                currentFile++;
+            }
+            currentFile = file;
+            currentRank--;
+            slidingMove = currentSquare;
+
+            while (currentRank >= 0)
+            {
+                slidingMove[0] = slidingMove[0] - 1;
+
+                if (mBoard[currentFile][currentRank] & BLACK)
+                {
+                    break;
+                }
+                mPossibleMoves.push_back(currentSquare + slidingMove);
+
+                if (mBoard[currentFile][currentRank] & WHITE)
+                {
+                    break;
+                }
+                currentRank--;
+            }
+            currentRank = rank;
+            slidingMove = currentSquare;
+            currentRank++;
+
+            while (currentRank <= 7)
+            {
+                slidingMove[0] = slidingMove[0] + 1;
+
+                if (mBoard[currentFile][currentRank] & BLACK)
+                {
+                    break;
+                }
+                mPossibleMoves.push_back(currentSquare + slidingMove);
+
+                if (mBoard[currentFile][currentRank] & WHITE)
+                {
+                    break;
+                }
+                currentRank++;
+            }
+        }
+    }
+}
+
+void Board::GenerateDiagonalMoves(int const &pieceNum, int const &file, int const &rank, std::wstring const &currentSquare)
+{
+    if (pieceNum & WHITE)
+    {
+        int currentFile = file;
+        int currentRank = rank;
+        if (pieceNum == WHITE_BISHOP)
+        {
+            std::wstring slidingMove = currentSquare;
+            currentRank--;
+            currentFile--;
+            while (currentFile >= 0 && currentRank >= 0)
+            {
+                slidingMove[0] = slidingMove[0] - 1;
+                slidingMove[1] = slidingMove[1] + 1;
+                if (mBoard[currentFile][currentRank] & WHITE)
+                {
+                    break;
+                }
+                mPossibleMoves.push_back(currentSquare + slidingMove);
+
+                if (mBoard[currentFile][currentRank] & BLACK)
+                {
+                    break;
+                }
+                currentFile--;
+                currentRank--;
+            }
+            currentFile = file;
+            currentRank = rank;
+
+            slidingMove = currentSquare;
+
+            currentFile++;
+            currentRank--;
+            while (currentFile <= 7 && currentRank >= 0)
+            {
+                slidingMove[0] = slidingMove[0] - 1;
+                slidingMove[1] = slidingMove[1] - 1;
+                if (mBoard[currentFile][currentRank] & WHITE)
+                {
+                    break;
+                }
+                mPossibleMoves.push_back(currentSquare + slidingMove);
+
+                if (mBoard[currentFile][currentRank] & BLACK)
+                {
+                    break;
+                }
+                currentFile++;
+                currentRank--;
+            }
+            currentFile = file;
+            currentRank = rank;
+
+            slidingMove = currentSquare;
+
+            currentRank++;
+            currentFile--;
+            while (currentFile >= 0 && currentRank <= 7)
+            {
+                slidingMove[0] = slidingMove[0] + 1;
+                slidingMove[1] = slidingMove[1] + 1;
+                if (mBoard[currentFile][currentRank] & WHITE)
+                {
+                    break;
+                }
+                mPossibleMoves.push_back(currentSquare + slidingMove);
+
+                if (mBoard[currentFile][currentRank] & BLACK)
+                {
+                    break;
+                }
+                currentFile--;
+                currentRank++;
+            }
+            currentFile = file;
+            currentRank = rank;
+
+            slidingMove = currentSquare;
+
+            currentRank++;
+            currentFile++;
+            while (currentFile <= 7 && currentRank <= 7)
+            {
+                slidingMove[0] = slidingMove[0] + 1;
+                slidingMove[1] = slidingMove[1] - 1;
+                if (mBoard[currentFile][currentRank] & WHITE)
+                {
+                    break;
+                }
+                mPossibleMoves.push_back(currentSquare + slidingMove);
+
+                if (mBoard[currentFile][currentRank] & BLACK)
+                {
+                    break;
+                }
+                currentFile++;
+                currentRank++;
+            }
+        }
+    }
+
+    if (pieceNum & BLACK)
+    {
+        int currentFile = file;
+        int currentRank = rank;
+        if (pieceNum == BLACK_BISHOP)
+        {
+            std::wstring slidingMove = currentSquare;
+            currentRank--;
+            currentFile--;
+            while (currentFile >= 0 && currentRank >= 0)
+            {
+                slidingMove[0] = slidingMove[0] - 1;
+                slidingMove[1] = slidingMove[1] + 1;
+                if (mBoard[currentFile][currentRank] & BLACK)
+                {
+                    break;
+                }
+                mPossibleMoves.push_back(currentSquare + slidingMove);
+
+                if (mBoard[currentFile][currentRank] & WHITE)
+                {
+                    break;
+                }
+                currentFile--;
+                currentRank--;
+            }
+            currentFile = file;
+            currentRank = rank;
+
+            slidingMove = currentSquare;
+
+            currentFile++;
+            currentRank--;
+            while (currentFile <= 7 && currentRank >= 0)
+            {
+                slidingMove[0] = slidingMove[0] - 1;
+                slidingMove[1] = slidingMove[1] - 1;
+                if (mBoard[currentFile][currentRank] & BLACK)
+                {
+                    break;
+                }
+                mPossibleMoves.push_back(currentSquare + slidingMove);
+
+                if (mBoard[currentFile][currentRank] & WHITE)
+                {
+                    break;
+                }
+                currentFile++;
+                currentRank--;
+            }
+            currentFile = file;
+            currentRank = rank;
+
+            slidingMove = currentSquare;
+
+            currentRank++;
+            currentFile--;
+            while (currentFile >= 0 && currentRank <= 7)
+            {
+                slidingMove[0] = slidingMove[0] + 1;
+                slidingMove[1] = slidingMove[1] + 1;
+                if (mBoard[currentFile][currentRank] & BLACK)
+                {
+                    break;
+                }
+                mPossibleMoves.push_back(currentSquare + slidingMove);
+
+                if (mBoard[currentFile][currentRank] & WHITE)
+                {
+                    break;
+                }
+                currentFile--;
+                currentRank++;
+            }
+            currentFile = file;
+            currentRank = rank;
+
+            slidingMove = currentSquare;
+
+            currentRank++;
+            currentFile++;
+            while (currentFile <= 7 && currentRank <= 7)
+            {
+                slidingMove[0] = slidingMove[0] + 1;
+                slidingMove[1] = slidingMove[1] - 1;
+                if (mBoard[currentFile][currentRank] & BLACK)
+                {
+                    break;
+                }
+                mPossibleMoves.push_back(currentSquare + slidingMove);
+
+                if (mBoard[currentFile][currentRank] & WHITE)
+                {
+                    break;
+                }
+                currentFile++;
+                currentRank++;
+            }
+        }
     }
 }

@@ -72,13 +72,18 @@ public:
  std::vector<std::vector<int>> FenParser(std::wstring fenString);
  std::shared_ptr<Square> GetClosestSquare(wxPoint pos) override;
  void GeneratePossibleMoves();
- std::vector<int> GenerateSlidingMoves(std::vector<std::vector<int>> board);
+ void GenerateSlidingMoves(int const &pieceNum, int const &file, int const &rank, std::wstring const &currentSquare);
+ void GenerateDiagonalMoves(int const& pieceNum, int const& file, int const& rank, std::wstring const& currentSquare);
  void AddSquare(std::shared_ptr<Square> square) { mSquares.push_back(square); }
  std::vector<std::shared_ptr<Square>> GetSquares() { return mSquares; }
  void AddPiece(std::shared_ptr<Piece> piece) { mPieces.push_back(piece); }
  std::vector<std::shared_ptr<Piece>> GetPieces() { return mPieces; }
  std::shared_ptr<Piece> HitTest(wxPoint pos);
  void UpdateBoard(std::wstring const &move);
+ bool CheckBounds(int file, int rank);
+ void GenerateKingMoves(int const &pieceNum, int const &file, int const &rank, std::wstring const &currentSquare);
+ void GeneratePawnMoves(int const& pieceNum, int const& file, int const& rank, std::wstring const& currentSquare);
+ void GenerateKnightMoves(int const& pieceNum, int const& file, int const& rank, std::wstring const& currentSquare);
  std::vector<std::wstring> GetPossibleMoves() { return mPossibleMoves; }
 };
 
