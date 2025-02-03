@@ -212,6 +212,10 @@ void Board::GeneratePossibleMoves(bool response)
         mWhiteTurn = !mWhiteTurn;
         for (std::wstring const &move : mPossibleMoves)
         {
+            if (move.length() == 0)
+            {
+                continue;
+            }
             std::vector<std::vector<int>> tempBoard = mBoard;
             std::wstring tempWhiteKingSquare = mWhiteKingSquare;
             std::wstring tempBlackKingSquare = mBlackKingSquare;
@@ -270,18 +274,45 @@ std::shared_ptr<Piece> Board::HitTest(wxPoint pos)
 
 void Board::UpdateBoard(std::wstring const &move)
 {
-    int oldRank = move[0] - 'a';
-    int oldFile = (move[1] - '0') - 8;
-    int newRank = move[2] - 'a';
-    int newFile = (move[3] - '0') - 8;
+    if (move == L"OO")
+    {
+        if (mWhiteTurn)
+        {
+            mBoard[7][4] = 0;
+            mBoard[7][7] = 0;
 
-    oldFile = std::abs(oldFile);
-    newFile = std::abs(newFile);
+            mBoard[7][6] = WHITE_KING;
+            mBoard[7][5] = WHITE_ROOK;
 
-    int piece = mBoard[oldFile][oldRank];
+            mWhiteKingSquare = L"g1";
+        }
+        if (!mWhiteTurn)
+        {
+            mBoard[0][4] = 0;
+            mBoard[0][7] = 0;
 
-    mBoard[oldFile][oldRank] = 0;
-    mBoard[newFile][newRank] = piece;
+            mBoard[0][6] = BLACK_KING;
+            mBoard[0][5] = BLACK_ROOK;
+
+            mBlackKingSquare = L"g8";
+        }
+    }
+
+    else
+    {
+        int oldRank = move[0] - 'a';
+        int oldFile = (move[1] - '0') - 8;
+        int newRank = move[2] - 'a';
+        int newFile = (move[3] - '0') - 8;
+
+        oldFile = std::abs(oldFile);
+        newFile = std::abs(newFile);
+
+        int piece = mBoard[oldFile][oldRank];
+
+        mBoard[oldFile][oldRank] = 0;
+        mBoard[newFile][newRank] = piece;
+    }
 }
 
 bool Board::CheckBounds(int file, int rank)
@@ -427,6 +458,19 @@ void Board::GenerateKingMoves(int const &pieceNum, int const &file, int const &r
             }
 
         }
+
+        if (mBoard[7][5] == 0 && mBoard[7][6] == 0)
+        {
+            std::wstring kingSideCastle = L"OO";
+            if (response)
+            {
+                mResponses.push_back(kingSideCastle);
+            }
+            else
+            {
+                mPossibleMoves.push_back(kingSideCastle);
+            }
+        }
     }
     else if (pieceNum == BLACK_KING)
     {
@@ -558,6 +602,18 @@ void Board::GenerateKingMoves(int const &pieceNum, int const &file, int const &r
             else
             {
                 mPossibleMoves.push_back(currentSquare + left);
+            }
+        }
+        if (mBoard[0][5] == 0 && mBoard[0][6] == 0)
+        {
+            std::wstring kingSideCastle = L"OO";
+            if (response)
+            {
+                mResponses.push_back(kingSideCastle);
+            }
+            else
+            {
+                mPossibleMoves.push_back(kingSideCastle);
             }
         }
     }

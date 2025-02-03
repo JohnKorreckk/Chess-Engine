@@ -92,48 +92,49 @@ std::shared_ptr<Board> BoardFactory::Create(std::wstring resourcesDir)
             board->AddDrawable(square);
             board->AddSquare(square);
         }
-  }
+    }
 
-        for (int rank = 0; rank < 8; rank++) {
-            for (int file = 0; file < 8; file++) {
-                std::wstring pieceName;
+    for (int rank = 0; rank < 8; rank++)
+    {
+        for (int file = 0; file < 8; file++) {
+            std::wstring pieceName;
 
-                // Position the square on the board
-                int x = board->GetRelativePosition().x + file * squareSize;
-                int y = board->GetRelativePosition().y + rank * squareSize;
+            // Position the square on the board
+            int x = board->GetRelativePosition().x + file * squareSize;
+            int y = board->GetRelativePosition().y + rank * squareSize;
 
 
-                switch (board->GetBoard()[rank][file]) {
-                case WHITE_PAWN: pieceName = L"/Chess_plt60.png"; break;
-                case WHITE_KNIGHT: pieceName = L"/Chess_nlt60.png"; break;
-                case WHITE_BISHOP: pieceName = L"/Chess_blt60.png"; break;
-                case WHITE_ROOK: pieceName = L"/Chess_rlt60.png"; break;
-                case WHITE_QUEEN: pieceName = L"/Chess_qlt60.png"; break;
-                case WHITE_KING: pieceName = L"/Chess_klt60.png"; break;
-                case BLACK_PAWN: pieceName = L"/Chess_pdt60.png"; break;
-                case BLACK_KNIGHT: pieceName = L"/Chess_ndt60.png"; break;
-                case BLACK_BISHOP: pieceName = L"/Chess_bdt60.png"; break;
-                case BLACK_ROOK: pieceName = L"/Chess_rdt60.png"; break;
-                case BLACK_QUEEN: pieceName = L"/Chess_qdt60.png"; break;
-                case BLACK_KING: pieceName = L"/Chess_kdt60.png"; break;
-                default: pieceName = L"EMPTY"; break;
-                }
-
-                if (pieceName != "EMPTY")
-                {
-                    auto piece = std::make_shared<Piece>(std::to_wstring(board->GetBoard()[rank][file]), imagesDir + pieceName);
-                    board->GetSquares()[rank*8 + file]->SetPiece(&*piece);
-                    wxPoint pos = piece->GetSquare()->GetPosition();
-                    piece->SetPosition(wxPoint(pos.x - 75/2, pos.y - 75/2));
-                    piece->SetActor(&*board);
-                    board->AddDrawable(piece);
-                    board->AddPiece(piece);
-                }
+            switch (board->GetBoard()[rank][file]) {
+            case WHITE_PAWN: pieceName = L"/Chess_plt60.png"; break;
+            case WHITE_KNIGHT: pieceName = L"/Chess_nlt60.png"; break;
+            case WHITE_BISHOP: pieceName = L"/Chess_blt60.png"; break;
+            case WHITE_ROOK: pieceName = L"/Chess_rlt60.png"; break;
+            case WHITE_QUEEN: pieceName = L"/Chess_qlt60.png"; break;
+            case WHITE_KING: pieceName = L"/Chess_klt60.png"; break;
+            case BLACK_PAWN: pieceName = L"/Chess_pdt60.png"; break;
+            case BLACK_KNIGHT: pieceName = L"/Chess_ndt60.png"; break;
+            case BLACK_BISHOP: pieceName = L"/Chess_bdt60.png"; break;
+            case BLACK_ROOK: pieceName = L"/Chess_rdt60.png"; break;
+            case BLACK_QUEEN: pieceName = L"/Chess_qdt60.png"; break;
+            case BLACK_KING: pieceName = L"/Chess_kdt60.png"; break;
+            default: pieceName = L"EMPTY"; break;
             }
-            auto gameOverScreen = std::make_shared<ImageDrawable>(L"GameOver", imagesDir + L"/gameover.png");
-            gameOverScreen->SetPosition(wxPoint(-100000, -10000));
-            gameOverScreen->SetActor(&*board);
-            board->AddDrawable(gameOverScreen);
- }
+
+            if (pieceName != "EMPTY")
+            {
+                auto piece = std::make_shared<Piece>(std::to_wstring(board->GetBoard()[rank][file]), imagesDir + pieceName);
+                board->GetSquares()[rank*8 + file]->SetPiece(&*piece);
+                wxPoint pos = piece->GetSquare()->GetPosition();
+                piece->SetPosition(wxPoint(pos.x - 75/2, pos.y - 75/2));
+                piece->SetActor(&*board);
+                board->AddDrawable(piece);
+                board->AddPiece(piece);
+            }
+        }
+    }
+    auto gameOverScreen = std::make_shared<ImageDrawable>(L"GameOver", imagesDir + L"/gameover.png");
+    gameOverScreen->SetPosition(wxPoint(-100000, -10000));
+    gameOverScreen->SetActor(&*board);
+    board->AddDrawable(gameOverScreen);
     return board;
 }
