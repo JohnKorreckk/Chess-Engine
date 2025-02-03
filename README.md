@@ -9,6 +9,9 @@ This repository contains a chess engine implemented in C++. It is designed for e
 - **AI Logic**: Basic AI capabilities using Minimax and Alpha-Beta pruning. (Working progress)
 - **Testing**: Unit tests to validate key functionalities.
 
+## Demo
+https://youtu.be/OmasjnNmmD4
+
 ## Getting Started
 
 ### Prerequisites
