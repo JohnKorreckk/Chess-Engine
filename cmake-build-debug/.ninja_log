@@ -46,3 +46,13 @@
 11	1180	1738559393350670272	ChessEngineLib/CMakeFiles/ChessEngineLib.dir/ViewEdit.cpp.o	904a61ea12aa7355
 1180	1301	1738559394519672979	ChessEngineLib/libChessEngineLib.a	f04d1037baad4803
 1301	1561	1738559394640284448	Chess_Engine.app/Contents/MacOS/Chess_Engine	ee045c8bed45bbe6
+18	1710	1738600612889693199	ChessEngineLib/CMakeFiles/ChessEngineLib.dir/ViewEdit.cpp.o	904a61ea12aa7355
+20	1733	1738600612891329875	ChessEngineLib/CMakeFiles/ChessEngineLib.dir/Board.cpp.o	e19905c531362b43
+1733	1885	1738600614604264346	ChessEngineLib/libChessEngineLib.a	f04d1037baad4803
+1885	2193	1738600614756303250	Chess_Engine.app/Contents/MacOS/Chess_Engine	ee045c8bed45bbe6
+18	2345	1738600918854883372	ChessEngineLib/CMakeFiles/ChessEngineLib.dir/Board.cpp.o	e19905c531362b43
+2345	2490	1738600921181225646	ChessEngineLib/libChessEngineLib.a	f04d1037baad4803
+2490	2924	1738600921326479326	Chess_Engine.app/Contents/MacOS/Chess_Engine	ee045c8bed45bbe6
+46	2647	1738601468408494654	ChessEngineLib/CMakeFiles/ChessEngineLib.dir/Board.cpp.o	e19905c531362b43
+2648	2787	1738601471010330086	ChessEngineLib/libChessEngineLib.a	f04d1037baad4803
+2787	3139	1738601471149792245	Chess_Engine.app/Contents/MacOS/Chess_Engine	ee045c8bed45bbe6

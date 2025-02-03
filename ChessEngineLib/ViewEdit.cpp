@@ -238,6 +238,98 @@ void ViewEdit::OnLeftUp(wxMouseEvent &event)
                 GetPicture()->UpdateObservers();
             }
         }
+        else if (move == L"e8a8" || move == L"e8b8")
+        {
+            if (std::find(possibleMoves.begin(), possibleMoves.end(), L"OOO") != possibleMoves.end())
+            {
+                std::shared_ptr<Square> newRookSquare;
+                std::shared_ptr<Square> newKingSquare;
+                std::shared_ptr<Square> oldRookSquare;
+                std::shared_ptr<Square> oldKingSquare;
+                Piece* rook = nullptr;
+
+                for (auto square : mBoard->GetSquares())
+                {
+
+                    if (square->GetName() == L"d8")
+                    {
+                        newRookSquare = square;
+                    }
+                    else if (square->GetName() == L"c8")
+                    {
+                        newKingSquare = square;
+                    }
+                    else if (square->GetName() == L"a8")
+                    {
+                        oldRookSquare = square;
+                        rook = square->GetPiece();
+                    }
+                    else if (square->GetName() == L"e8")
+                    {
+                        oldKingSquare = square;
+                    }
+                }
+                newKingSquare->SetPiece(&*mSelectedPiece);
+                if (rook)
+                {
+                    newRookSquare->SetPiece(rook);
+                    rook->SetPosition(wxPoint(newRookSquare->GetCenter().x-(squareSize/2), newRookSquare->GetCenter().y-(squareSize/2)));
+                }
+                mSelectedPiece->SetPosition(wxPoint(newKingSquare->GetCenter().x-(squareSize/2), newKingSquare->GetCenter().y-(squareSize/2)));
+                oldKingSquare->SetPiece(nullptr);
+                oldRookSquare->SetPiece(nullptr);
+                mBoard->UpdateBoard(L"OOO");
+                mBoard->SetWhiteTurn(!whiteTurn);
+                mBoard->GeneratePossibleMoves(false);
+                GetPicture()->UpdateObservers();
+            }
+        }
+        else if (move == L"e1a1" || move == L"e1b1")
+        {
+            if (std::find(possibleMoves.begin(), possibleMoves.end(), L"OOO") != possibleMoves.end())
+            {
+                std::shared_ptr<Square> newRookSquare;
+                std::shared_ptr<Square> newKingSquare;
+                std::shared_ptr<Square> oldRookSquare;
+                std::shared_ptr<Square> oldKingSquare;
+                Piece* rook = nullptr;
+
+                for (auto square : mBoard->GetSquares())
+                {
+
+                    if (square->GetName() == L"d1")
+                    {
+                        newRookSquare = square;
+                    }
+                    else if (square->GetName() == L"c1")
+                    {
+                        newKingSquare = square;
+                    }
+                    else if (square->GetName() == L"a1")
+                    {
+                        oldRookSquare = square;
+                        rook = square->GetPiece();
+                    }
+                    else if (square->GetName() == L"e1")
+                    {
+                        oldKingSquare = square;
+                    }
+                }
+                newKingSquare->SetPiece(&*mSelectedPiece);
+                if (rook)
+                {
+                    newRookSquare->SetPiece(rook);
+                    rook->SetPosition(wxPoint(newRookSquare->GetCenter().x-(squareSize/2), newRookSquare->GetCenter().y-(squareSize/2)));
+                }
+                mSelectedPiece->SetPosition(wxPoint(newKingSquare->GetCenter().x-(squareSize/2), newKingSquare->GetCenter().y-(squareSize/2)));
+                oldKingSquare->SetPiece(nullptr);
+                oldRookSquare->SetPiece(nullptr);
+                mBoard->UpdateBoard(L"OOO");
+                mBoard->SetWhiteTurn(!whiteTurn);
+                mBoard->GeneratePossibleMoves(false);
+                GetPicture()->UpdateObservers();
+            }
+        }
         else if (std::find(possibleMoves.begin(), possibleMoves.end(), move) != possibleMoves.end())
         {
             if (newSquare->GetPiece())

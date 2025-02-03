@@ -298,6 +298,30 @@ void Board::UpdateBoard(std::wstring const &move)
         }
     }
 
+    else if (move == L"OOO")
+    {
+        if (mWhiteTurn)
+        {
+            mBoard[7][4] = 0;
+            mBoard[7][0] = 0;
+
+            mBoard[7][2] = WHITE_KING;
+            mBoard[7][3] = WHITE_ROOK;
+
+            mWhiteKingSquare = L"c1";
+        }
+        if (!mWhiteTurn)
+        {
+            mBoard[0][4] = 0;
+            mBoard[0][0] = 0;
+
+            mBoard[0][2] = BLACK_KING;
+            mBoard[0][3] = BLACK_ROOK;
+
+            mBlackKingSquare = L"c8";
+        }
+    }
+
     else
     {
         int oldRank = move[0] - 'a';
@@ -471,6 +495,18 @@ void Board::GenerateKingMoves(int const &pieceNum, int const &file, int const &r
                 mPossibleMoves.push_back(kingSideCastle);
             }
         }
+        if (mBoard[7][1] == 0 && mBoard[7][2] == 0 && mBoard[7][3] == 0)
+        {
+            std::wstring queenSideCastle = L"OOO";
+            if (response)
+            {
+                mResponses.push_back(queenSideCastle);
+            }
+            else
+            {
+                mPossibleMoves.push_back(queenSideCastle);
+            }
+        }
     }
     else if (pieceNum == BLACK_KING)
     {
@@ -614,6 +650,18 @@ void Board::GenerateKingMoves(int const &pieceNum, int const &file, int const &r
             else
             {
                 mPossibleMoves.push_back(kingSideCastle);
+            }
+        }
+        if (mBoard[0][1] == 0 && mBoard[0][2] == 0 && mBoard[0][3] == 0)
+        {
+            std::wstring queenSideCastle = L"OOO";
+            if (response)
+            {
+                mResponses.push_back(queenSideCastle);
+            }
+            else
+            {
+                mPossibleMoves.push_back(queenSideCastle);
             }
         }
     }
