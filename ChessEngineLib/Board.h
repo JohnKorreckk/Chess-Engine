@@ -35,6 +35,10 @@ private:
  bool mBlackInCheck = false;
  /// Is white in check?
  bool mWhiteInCheck = false;
+ /// Does black have castling rights?
+ bool mBlackCastlingRights = true;
+ /// Does white have castling rights?
+ bool mWhiteCastlingRights = true;
  /// The opposing color's responses
  std::vector <std::wstring> mResponses;
 

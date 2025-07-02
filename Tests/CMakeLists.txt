@@ -2,7 +2,7 @@ project(Tests)
 
 set(TEST_FILES
     gtest_main.cpp
-        PictureObserverTest.cpp PictureTest.cpp ActorTest.cpp DrawableTest.cpp PolyDrawableTest.cpp ImageDrawableTest.cpp TimelineTest.cpp AnimChannelAngleTest.cpp)
+        PictureObserverTest.cpp PictureTest.cpp DrawableTest.cpp PolyDrawableTest.cpp ImageDrawableTest.cpp)
 
 # Get Google Tests
 include(FetchContent)

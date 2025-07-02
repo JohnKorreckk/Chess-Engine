@@ -274,6 +274,7 @@ std::shared_ptr<Piece> Board::HitTest(wxPoint pos)
 
 void Board::UpdateBoard(std::wstring const &move)
 {
+    // Kingside castling
     if (move == L"OO")
     {
         if (mWhiteTurn)
@@ -285,6 +286,7 @@ void Board::UpdateBoard(std::wstring const &move)
             mBoard[7][5] = WHITE_ROOK;
 
             mWhiteKingSquare = L"g1";
+            mWhiteCastlingRights = false;
         }
         if (!mWhiteTurn)
         {
@@ -295,9 +297,11 @@ void Board::UpdateBoard(std::wstring const &move)
             mBoard[0][5] = BLACK_ROOK;
 
             mBlackKingSquare = L"g8";
+            mBlackCastlingRights = false;
         }
     }
 
+    // Queenside castling
     else if (move == L"OOO")
     {
         if (mWhiteTurn)
@@ -309,6 +313,7 @@ void Board::UpdateBoard(std::wstring const &move)
             mBoard[7][3] = WHITE_ROOK;
 
             mWhiteKingSquare = L"c1";
+            mWhiteCastlingRights = false;
         }
         if (!mWhiteTurn)
         {
@@ -319,6 +324,7 @@ void Board::UpdateBoard(std::wstring const &move)
             mBoard[0][3] = BLACK_ROOK;
 
             mBlackKingSquare = L"c8";
+            mBlackCastlingRights = false;
         }
     }
 
@@ -334,8 +340,21 @@ void Board::UpdateBoard(std::wstring const &move)
 
         int piece = mBoard[oldFile][oldRank];
 
+        // Check promotion
+        if (piece == WHITE_PAWN && newFile == 0)
+        {
+            mBoard[newFile][newRank] = WHITE_QUEEN;
+            std::cout << "White promotion occurred at: " << "File: " << newFile << " " << "Rank: " << newRank << std::endl;
+        }
+        else if (piece == BLACK_PAWN && newFile == 7) {
+            mBoard[newFile][newRank] = BLACK_QUEEN;
+            std::cout << "Black promotion occurred" << newFile << " " << newRank << std::endl;
+        }
+        else
+        {
+            mBoard[newFile][newRank] = piece;
+        }
         mBoard[oldFile][oldRank] = 0;
-        mBoard[newFile][newRank] = piece;
     }
 }
 
@@ -483,7 +502,8 @@ void Board::GenerateKingMoves(int const &pieceNum, int const &file, int const &r
 
         }
 
-        if (mBoard[7][5] == 0 && mBoard[7][6] == 0)
+        // King side castling
+        if (mWhiteCastlingRights && mBoard[7][5] == 0 && mBoard[7][6] == 0)
         {
             std::wstring kingSideCastle = L"OO";
             if (response)
@@ -495,7 +515,9 @@ void Board::GenerateKingMoves(int const &pieceNum, int const &file, int const &r
                 mPossibleMoves.push_back(kingSideCastle);
             }
         }
-        if (mBoard[7][1] == 0 && mBoard[7][2] == 0 && mBoard[7][3] == 0)
+
+        // Queen side castling
+        if (mWhiteCastlingRights && mBoard[7][1] == 0 && mBoard[7][2] == 0 && mBoard[7][3] == 0)
         {
             std::wstring queenSideCastle = L"OOO";
             if (response)
@@ -640,7 +662,9 @@ void Board::GenerateKingMoves(int const &pieceNum, int const &file, int const &r
                 mPossibleMoves.push_back(currentSquare + left);
             }
         }
-        if (mBoard[0][5] == 0 && mBoard[0][6] == 0)
+
+        // King side castling
+        if (mBlackCastlingRights && mBoard[0][5] == 0 && mBoard[0][6] == 0)
         {
             std::wstring kingSideCastle = L"OO";
             if (response)
@@ -652,7 +676,9 @@ void Board::GenerateKingMoves(int const &pieceNum, int const &file, int const &r
                 mPossibleMoves.push_back(kingSideCastle);
             }
         }
-        if (mBoard[0][1] == 0 && mBoard[0][2] == 0 && mBoard[0][3] == 0)
+
+        // Queen side castling
+        if (mBlackCastlingRights && mBoard[0][1] == 0 && mBoard[0][2] == 0 && mBoard[0][3] == 0)
         {
             std::wstring queenSideCastle = L"OOO";
             if (response)

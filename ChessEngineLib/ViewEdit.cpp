@@ -187,6 +187,7 @@ void ViewEdit::OnLeftUp(wxMouseEvent &event)
                 oldKingSquare->SetPiece(nullptr);
                 oldRookSquare->SetPiece(nullptr);
                 mBoard->UpdateBoard(L"OO");
+                std::cout << "Update Board Called" << std::endl;
                 mBoard->SetWhiteTurn(!whiteTurn);
                 mBoard->GeneratePossibleMoves(false);
                 GetPicture()->UpdateObservers();
@@ -233,6 +234,7 @@ void ViewEdit::OnLeftUp(wxMouseEvent &event)
                 oldKingSquare->SetPiece(nullptr);
                 oldRookSquare->SetPiece(nullptr);
                 mBoard->UpdateBoard(L"OO");
+                std::cout << "Update Board Called" << std::endl;
                 mBoard->SetWhiteTurn(!whiteTurn);
                 mBoard->GeneratePossibleMoves(false);
                 GetPicture()->UpdateObservers();
@@ -279,6 +281,7 @@ void ViewEdit::OnLeftUp(wxMouseEvent &event)
                 oldKingSquare->SetPiece(nullptr);
                 oldRookSquare->SetPiece(nullptr);
                 mBoard->UpdateBoard(L"OOO");
+                std::cout << "Update Board Called" << std::endl;
                 mBoard->SetWhiteTurn(!whiteTurn);
                 mBoard->GeneratePossibleMoves(false);
                 GetPicture()->UpdateObservers();
@@ -325,6 +328,7 @@ void ViewEdit::OnLeftUp(wxMouseEvent &event)
                 oldKingSquare->SetPiece(nullptr);
                 oldRookSquare->SetPiece(nullptr);
                 mBoard->UpdateBoard(L"OOO");
+                std::cout << "Update Board Called" << std::endl;
                 mBoard->SetWhiteTurn(!whiteTurn);
                 mBoard->GeneratePossibleMoves(false);
                 GetPicture()->UpdateObservers();
@@ -352,12 +356,14 @@ void ViewEdit::OnLeftUp(wxMouseEvent &event)
                 mBoard->SetWhiteKingSquare({move[2], move[3]});
             }
             mBoard->UpdateBoard(move);
+            std::cout << "Update Board Called" << std::endl;
             mBoard->SetWhiteTurn(!whiteTurn);
             mBoard->GeneratePossibleMoves(false);
             GetPicture()->UpdateObservers();
         }
         else
         {
+            std::cout << "Move not viable" << std::endl;
             wxPoint oldPos = mSelectedPiece->GetSquare()->GetPosition();
             mSelectedPiece->SetPosition(wxPoint(oldPos.x-(squareSize/2), oldPos.y-(squareSize/2)));
             GetPicture()->UpdateObservers();
